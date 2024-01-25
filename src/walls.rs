@@ -9,7 +9,7 @@ pub enum WallLocation {
 }
 
 #[derive(Component)]
-pub struct Collider;
+struct Collider;
 
 #[derive(Bundle)]
 pub struct WallBundle {

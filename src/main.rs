@@ -1,4 +1,5 @@
 mod constants;
+mod doors;
 mod player;
 mod walls;
 
@@ -27,7 +28,6 @@ fn setup(
                 custom_size: Some(constants::PLAYER_SIZE),
                 ..default()
             },
-            transform: Transform::from_translation(Vec3::new(-50., 0., 0.)),
             ..default()
         },
         player::Player,
@@ -38,4 +38,10 @@ fn setup(
     commands.spawn(walls::WallBundle::new(walls::WallLocation::Right));
     commands.spawn(walls::WallBundle::new(walls::WallLocation::Bottom));
     commands.spawn(walls::WallBundle::new(walls::WallLocation::Top));
+
+    // Doors
+    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Left));
+    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Right));
+    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Bottom));
+    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Top));
 }
