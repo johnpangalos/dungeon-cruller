@@ -8,13 +8,9 @@ pub enum WallLocation {
     Top,
 }
 
-#[derive(Component)]
-struct Collider;
-
 #[derive(Bundle)]
 pub struct WallBundle {
     sprite_bundle: SpriteBundle,
-    collider: Collider,
 }
 
 impl WallLocation {
@@ -61,7 +57,6 @@ impl WallBundle {
                 },
                 ..default()
             },
-            collider: Collider,
         }
     }
 }

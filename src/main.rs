@@ -9,7 +9,16 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
-        .add_systems(FixedUpdate, (player::move_player).chain())
+        .add_systems(
+            FixedUpdate,
+            (
+                player::move_player,
+                doors::check_door_collisions,
+                doors::print_collision,
+            )
+                .chain(),
+        )
+        .add_event::<doors::CollisionEvent>()
         .run();
 }
 

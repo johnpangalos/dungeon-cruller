@@ -1,5 +1,6 @@
 use crate::constants;
-use bevy::prelude::*;
+use crate::player;
+use bevy::{prelude::*, sprite::collide_aabb::collide};
 
 pub enum DoorLocation {
     Left,
@@ -9,13 +10,16 @@ pub enum DoorLocation {
 }
 
 #[derive(Component)]
-struct Collider;
+pub struct Collider;
 
 #[derive(Bundle)]
 pub struct DoorBundle {
     sprite_bundle: SpriteBundle,
     collider: Collider,
 }
+
+#[derive(Event, Default)]
+pub struct CollisionEvent;
 
 impl DoorLocation {
     fn position(&self) -> Vec2 {
@@ -73,5 +77,38 @@ impl DoorBundle {
             },
             collider: Collider,
         }
+    }
+}
+
+pub fn check_door_collisions(
+    _commands: Commands,
+    player_query: Query<&Transform, With<player::Player>>,
+    collider_query: Query<&Transform, With<Collider>>,
+    mut collision_events: EventWriter<CollisionEvent>,
+) {
+    let player_transform = player_query.single();
+
+    for transform in &collider_query {
+        println!("player position {:?}", player_transform.translation);
+        println!("player size {:?}", player_transform.scale.truncate());
+        println!("transform position{:?}", transform.translation);
+        println!("transform size {:?}", transform.scale.truncate());
+        let collision = collide(
+            player_transform.translation,
+            player_transform.scale.truncate(),
+            transform.translation,
+            transform.scale.truncate(),
+        );
+
+        if let Some(_collision) = collision {
+            collision_events.send_default();
+        }
+    }
+}
+
+pub fn print_collision(_commands: Commands, mut collision_events: EventReader<CollisionEvent>) {
+    if !collision_events.is_empty() {
+        collision_events.clear();
+        println!("collide!")
     }
 }

@@ -10,7 +10,7 @@ pub const BOTTOM_WALL: f32 = -300.;
 pub const TOP_WALL: f32 = 300.;
 
 pub const DOOR_WIDTH: f32 = 50.;
-pub const DOOR_THICKNESS: f32 = 1.;
+pub const DOOR_THICKNESS: f32 = 10.;
 
 pub const PLAYER_COLOR: Color = Color::rgb(0.0, 0.9, 0.0);
 pub const WALL_COLOR: Color = Color::rgb(0.0, 0.0, 0.0);
