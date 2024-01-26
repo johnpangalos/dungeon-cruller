@@ -45,7 +45,7 @@ macro_rules! render {
 #[derive(Component, Default)]
 struct ButtonMainMenu;
 render!(ButtonMainMenu, |_, slot| button(
-    cn!(w_full, bg_white, hover_(bg_red_600)),
+    cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
     slot
 ));
 

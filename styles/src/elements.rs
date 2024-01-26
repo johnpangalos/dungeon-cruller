@@ -252,7 +252,7 @@ macro_rules! on_update_system {
 macro_rules! on_click_system {
     ($on_update:expr, $component:ty, ) => {
         fn on_click(
-            mut commands: Commands,
+            input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
         ) {
             fn f() -> impl Fn(&(Entity, &Interaction)) {
@@ -261,7 +261,11 @@ macro_rules! on_click_system {
 
             for v in query.iter() {
                 match v.1 {
-                    Interaction::Pressed => f()(&v),
+                    Interaction::Hovered => {
+                        if (input.just_released(MouseButton::Left)) {
+                            f()(&v)
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -269,7 +273,7 @@ macro_rules! on_click_system {
     };
     ($on_click:expr, $component:ty, $a:ty) => {
         fn on_click(
-            mut commands: Commands,
+            input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
         ) {
@@ -279,7 +283,11 @@ macro_rules! on_click_system {
 
             for v in query.iter() {
                 match v.1 {
-                    Interaction::Pressed => f()(&v, &mut a),
+                    Interaction::Hovered => {
+                        if (input.just_released(MouseButton::Left)) {
+                            f()(&v, &mut a)
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -287,7 +295,7 @@ macro_rules! on_click_system {
     };
     ($on_click:expr, $component:ty, $a:ty, $b:ty) => {
         fn on_click(
-            mut commands: Commands,
+            input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
             mut b: $b,
@@ -298,7 +306,11 @@ macro_rules! on_click_system {
 
             for v in query.iter() {
                 match v.1 {
-                    Interaction::Pressed => f()(&v, &mut a, &mut b),
+                    Interaction::Hovered => {
+                        if (input.just_released(MouseButton::Left)) {
+                            f()(&v, &mut a, &mut b)
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -306,7 +318,7 @@ macro_rules! on_click_system {
     };
     ($on_click:expr, $component:ty, $a:ty, $b:ty, $c:ty) => {
         fn on_click(
-            mut commands: Commands,
+            input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
             mut b: $b,
@@ -318,7 +330,11 @@ macro_rules! on_click_system {
 
             for v in query.iter() {
                 match v.1 {
-                    Interaction::Pressed => f()(&v, &mut a, &mut b, &mut c),
+                    Interaction::Hovered => {
+                        if (input.just_released(MouseButton::Left)) {
+                            f()(&v, &mut a, &mut b, &mut c)
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -326,6 +342,7 @@ macro_rules! on_click_system {
     };
     ($on_click:expr, $component:ty, $a:ty, $b:ty, $c:ty, $d:ty) => {
         fn on_click(
+            input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
             mut b: $b,
@@ -338,7 +355,11 @@ macro_rules! on_click_system {
 
             for v in query.iter() {
                 match v.1 {
-                    Interaction::Pressed => f()(&v, &mut a, &mut b, &mut c, &mut d),
+                    Interaction::Hovered => {
+                        if (input.just_released(MouseButton::Left)) {
+                            f()(&v, &mut a, &mut b, &mut c, &mut d)
+                        }
+                    }
                     _ => {}
                 }
             }
