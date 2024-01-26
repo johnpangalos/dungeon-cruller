@@ -1,6 +1,4 @@
 use crate::constants::DebugState;
-use bevy::diagnostic;
-use bevy::diagnostic::Diagnostics;
 use bevy::ecs::system::Insert;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
