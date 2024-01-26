@@ -1,4 +1,4 @@
-use bevy::{ecs::system::Insert, prelude::*};
+use bevy::prelude::*;
 
 pub struct StylesPlugin;
 
@@ -16,21 +16,21 @@ impl Plugin for StylesPlugin {
 }
 
 #[derive(Component)]
-struct InteractionBackgroundColor {
+pub struct InteractionBackgroundColor {
     none: BackgroundColor,
     hover: BackgroundColor,
     pressed: BackgroundColor,
 }
 
 #[derive(Component)]
-struct InteractionStyle {
+pub struct InteractionStyle {
     none: Style,
     hover: Style,
     pressed: Style,
 }
 
 #[derive(Component)]
-struct InteractionTextStyle {
+pub struct InteractionTextStyle {
     none: TextStyle,
     hover: TextStyle,
     pressed: TextStyle,
@@ -78,7 +78,53 @@ fn interaction_text_style_system(
     }
 }
 
-pub struct Element(pub Box<dyn FnOnce(&mut ChildBuilder) -> Entity>);
+pub trait Render {
+    fn render(&self, parent: &mut ChildBuilder, slot: Element) -> Entity;
+}
+
+pub trait IntoElement {
+    fn el(self) -> Element;
+
+    fn slot(self, children: impl IntoIterator<Item = Element>) -> Element;
+}
+
+impl<T: Render + 'static> IntoElement for T {
+    fn el(self) -> Element {
+        Element::Dyn(Box::new(self), vec![])
+    }
+
+    fn slot(self, children: impl IntoIterator<Item = Element>) -> Element {
+        let vec = children.into_iter().collect::<Vec<_>>();
+        Element::Dyn(Box::new(self), vec)
+    }
+}
+
+pub enum Element {
+    Dyn(Box<dyn Render>, Vec<Element>),
+    Fragment(Vec<Element>),
+    Div(
+        (
+            NodeBundle,
+            Interaction,
+            InteractionStyle,
+            InteractionBackgroundColor,
+        ),
+        Vec<Element>,
+    ),
+    Button(
+        (ButtonBundle, InteractionStyle, InteractionBackgroundColor),
+        Vec<Element>,
+    ),
+    Image(
+        (
+            ImageBundle,
+            Interaction,
+            InteractionStyle,
+            InteractionBackgroundColor,
+        ),
+    ),
+    Text((TextBundle, Interaction, InteractionTextStyle)),
+}
 
 impl IntoIterator for Element {
     type Item = Element;
@@ -87,31 +133,6 @@ impl IntoIterator for Element {
     fn into_iter(self) -> Self::IntoIter {
         vec![self].into_iter()
     }
-}
-
-impl Element {
-    fn new(node: impl FnOnce(&mut ChildBuilder) -> Entity + 'static) -> Self {
-        Self(Box::new(node))
-    }
-
-    pub fn with<T: Bundle>(self, bundle: T) -> Self {
-        Element::new(move |parent| {
-            let entity = self.0(parent);
-            parent.add_command(Insert { entity, bundle });
-            entity
-        })
-    }
-}
-
-pub fn fragment(children: impl IntoIterator<Item = Element>) -> Element {
-    let vec = children.into_iter().collect::<Vec<_>>();
-    Element::new(move |parent| {
-        for child in vec.into_iter() {
-            child.0(parent);
-        }
-
-        parent.parent_entity()
-    })
 }
 
 #[macro_export]
@@ -138,27 +159,14 @@ macro_rules! create_interaction_bundle {
     }};
 }
 
-#[derive(Component)]
-struct ElementButton;
-
 pub fn button(
     class: impl Fn(ButtonBundle, Interaction) -> ButtonBundle + 'static,
     children: impl IntoIterator<Item = Element>,
 ) -> Element {
     let vec = children.into_iter().collect::<Vec<_>>();
+    let bundle = create_interaction_bundle!(class, ButtonBundle);
 
-    Element::new(move |parent| {
-        let bundle = create_interaction_bundle!(class, ButtonBundle);
-
-        parent
-            .spawn((ElementButton, bundle))
-            .with_children(|current| {
-                for child in vec.into_iter() {
-                    child.0(current);
-                }
-            })
-            .id()
-    })
+    Element::Button(bundle, vec)
 }
 
 #[macro_export]
@@ -325,93 +333,95 @@ macro_rules! on_click {
     };
 }
 
-#[macro_export]
-macro_rules! element {
-    ($component:ty, $children:expr) => {
-        impl $component {
-            #[allow(dead_code)]
-            fn element() -> Element {
-                $children(fragment([])).with(Self::default())
+pub fn render(parent: &mut ChildBuilder, element: Element) -> Entity {
+    match element {
+        Element::Fragment(children) => {
+            for child in children {
+                render(parent, child);
             }
-
-            #[allow(dead_code)]
-            fn slot(children: impl IntoIterator<Item = Element>) -> Element {
-                $children(fragment(children)).with(Self::default())
-            }
+            parent.parent_entity()
         }
-    };
+        Element::Dyn(render, children) => render.render(parent, Element::Fragment(children)),
+        Element::Div(div, children) => parent
+            .spawn(div)
+            .with_children(|current| {
+                for child in children {
+                    render(current, child);
+                }
+            })
+            .id(),
+        Element::Button(button, children) => parent
+            .spawn(button)
+            .with_children(|current| {
+                for child in children {
+                    render(current, child);
+                }
+            })
+            .id(),
+        Element::Text(text) => parent.spawn(text).id(),
+
+        Element::Image(image) => parent.spawn(image).id(),
+    }
 }
 
-#[derive(Component)]
-struct ElementDiv;
+pub fn render_root<T: Component>(commands: &mut Commands, component: T, tree: Element) {
+    let screen = (
+        component,
+        NodeBundle {
+            style: Style {
+                display: Display::Flex,
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+    );
+
+    commands.spawn(screen).with_children(|parent| {
+        render(parent, tree);
+    });
+}
+
+pub fn el(s: impl Render + 'static, children: impl IntoIterator<Item = Element>) -> Element {
+    let vec = children.into_iter().collect::<Vec<_>>();
+    Element::Dyn(Box::new(s), vec)
+}
 
 pub fn div(
     class: impl Fn(NodeBundle, Interaction) -> NodeBundle + 'static,
     children: impl IntoIterator<Item = Element>,
 ) -> Element {
     let vec = children.into_iter().collect::<Vec<_>>();
-
-    Element::new(move |parent| {
-        let bundle = create_interaction_bundle!(class, NodeBundle);
-
-        parent
-            .spawn((ElementDiv, Interaction::None, bundle))
-            .with_children(|current| {
-                for child in vec.into_iter() {
-                    child.0(current);
-                }
-            })
-            .id()
-    })
+    let (a, b, c) = create_interaction_bundle!(class, NodeBundle);
+    Element::Div((a, Interaction::None, b, c), vec)
 }
 
-pub fn root(
-    component: impl Component,
-    class: impl Fn(NodeBundle, Interaction) -> NodeBundle,
-    el: Element,
-) -> impl FnOnce(&mut Commands) {
-    let bundle = class(NodeBundle::default(), Interaction::None);
-
-    move |commands| {
-        commands
-            .spawn((component, ElementDiv, Interaction::None, bundle))
-            .with_children(|parent| {
-                el.0(parent);
-            });
-    }
+pub fn root<T: Component>(component: T, element: Element) -> (T, Element) {
+    (component, element)
 }
 
-#[derive(Component)]
-struct ElementImg;
 pub fn img(
     class: impl Fn(ImageBundle, Interaction) -> ImageBundle + 'static,
     src: Handle<Image>,
 ) -> Element {
-    Element::new(move |parent| {
-        let mut bundle = create_interaction_bundle!(class, ImageBundle);
-        bundle.0.image.texture = src.clone();
-        parent.spawn((ElementImg, Interaction::None, bundle)).id()
-    })
-}
+    let (mut a, b, c) = create_interaction_bundle!(class, ImageBundle);
+    a.image.texture = src.clone();
 
-#[derive(Component)]
-struct ElementText;
+    Element::Image((a, Interaction::None, b, c))
+}
 
 pub fn text(
     class: impl Fn(TextStyle, Interaction) -> TextStyle + 'static,
     text: impl ToString + 'static,
 ) -> Element {
-    Element::new(move |parent| {
-        let interaction_style = InteractionTextStyle {
-            none: class(TextStyle::default(), Interaction::None),
-            hover: class(TextStyle::default(), Interaction::Hovered),
-            pressed: class(TextStyle::default(), Interaction::Pressed),
-        };
+    let interaction_style = InteractionTextStyle {
+        none: class(TextStyle::default(), Interaction::None),
+        hover: class(TextStyle::default(), Interaction::Hovered),
+        pressed: class(TextStyle::default(), Interaction::Pressed),
+    };
 
-        let bundle = TextBundle::from_section(text.to_string(), interaction_style.none.clone());
+    let bundle = TextBundle::from_section(text.to_string(), interaction_style.none.clone());
 
-        parent
-            .spawn((ElementText, Interaction::None, interaction_style, bundle))
-            .id()
-    })
+    Element::Text((bundle, Interaction::None, interaction_style))
 }

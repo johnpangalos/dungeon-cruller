@@ -1,5 +1,6 @@
 use crate::constants::GameState;
 use bevy::app::AppExit;
+use bevy::ecs::system::Insert;
 use bevy::prelude::*;
 
 use styles::elements::*;
@@ -24,15 +25,33 @@ impl Plugin for RootMainMenu {
     }
 }
 
+macro_rules! render {
+    ($component:ident, $element:expr) => {
+        impl Render for $component {
+            fn render(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
+                let e = render(parent, $element(&self, slot));
+
+                parent.add_command(Insert {
+                    entity: e,
+                    bundle: $component,
+                });
+
+                e
+            }
+        }
+    };
+}
+
 #[derive(Component, Default)]
 struct ButtonMainMenu;
-element!(ButtonMainMenu, |slot| {
-    button(cn!(w_full, bg_white, hover_(bg_red_600)), [slot])
-});
+render!(ButtonMainMenu, |_, slot| button(
+    cn!(w_full, bg_white, hover_(bg_red_600)),
+    slot
+));
 
 #[derive(Component, Default)]
 struct ButtonStartGame;
-element!(ButtonStartGame, ButtonMainMenu::slot);
+render!(ButtonStartGame, |_, slot| ButtonMainMenu.slot(slot));
 on_click!(
     ButtonStartGame,
     (ResMut<NextState<GameState>>),
@@ -43,25 +62,24 @@ on_click!(
 
 #[derive(Component, Default)]
 struct ButtonQuit;
-element!(ButtonQuit, ButtonMainMenu::slot);
+render!(ButtonQuit, |_, slot| ButtonMainMenu.slot(slot));
 on_click!(ButtonQuit, (EventWriter<AppExit>), |_, exit| {
     exit.send(AppExit)
 });
 
 fn setup_main_menu(mut commands: Commands) {
-    let render = root(
-        RootMainMenu,
-        cn!(flex, justify_center, items_center, h_full, w_full),
+    let tree = div(
+        cn!(h_full, w_full, flex, justify_center, items_center),
         div(
-            cn!(flex, flex_col, items_center),
+            cn!(flex, flex_col),
             [
-                ButtonStartGame::slot(text(cn!(text_5xl, text_black), "Start game")),
-                ButtonQuit::slot(text(cn!(text_5xl, text_black), "Quit")),
+                ButtonStartGame.slot(text(cn!(text_5xl, text_black), "Start game")),
+                ButtonQuit.slot(text(cn!(text_5xl, text_black), "Quit")),
             ],
         ),
     );
 
-    render(&mut commands);
+    render_root(&mut commands, RootMainMenu, tree);
 }
 
 fn despawn_recursively<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
