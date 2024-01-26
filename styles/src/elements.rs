@@ -367,10 +367,10 @@ macro_rules! run_click_system {
 macro_rules! on_click {
     ($component:ty, ($($queries:ty),*), $function:expr) => {
         impl $component {
-            run_click_system!($function, $component, $($queries),*);
-
             fn on_click() -> bevy::ecs::schedule::NodeConfigs<std::boxed::Box<dyn bevy::prelude::System<In = (), Out = ()>>>  {
-                Self::run_click_system.run_if(bevy::input::common_conditions::input_just_released(MouseButton::Left))
+                run_click_system!($function, $component, $($queries),*);
+
+                run_click_system.run_if(bevy::input::common_conditions::input_just_released(MouseButton::Left))
             }
         }
     };
