@@ -1,4 +1,3 @@
 [workspace]
-name = "root"
 resolver = "2"
 members = ["game", "styles"]
