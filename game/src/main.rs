@@ -23,6 +23,7 @@ fn main() {
                 player::pause_game.run_if(in_state(GameState::Running)),
                 player::unpause_game.run_if(in_state(GameState::Paused)),
             )
+                .run_if(in_state(AppState::Game))
                 .run_if(input_just_pressed(KeyCode::Escape)),
         )
         .add_systems(
