@@ -25,10 +25,9 @@ impl Plugin for PausePlugin {
 }
 
 #[derive(Component, Clone)]
-struct Back {
-    label: &'static str,
-}
-render!(Back, |&Back { label }, slot| button(
+struct Back(&'static str);
+
+render!(Back, |&Back(label), slot| button(
     cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
     [text(cn!(text_5xl, text_black), label), slot]
 ));
@@ -37,10 +36,9 @@ on_click!(Back, (ResMut<NextState<GameState>>), |_, gamestate| {
 });
 
 #[derive(Component, Clone)]
-struct Quit {
-    label: &'static str,
-}
-render!(Quit, |&Quit { label }, slot| button(
+struct Quit(&'static str);
+
+render!(Quit, |&Quit(label), slot| button(
     cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
     [text(cn!(text_5xl, text_black), label), slot]
 ));
@@ -53,13 +51,7 @@ fn setup(mut commands: Commands) {
         cn!(h_full, w_full, flex, justify_center, items_center),
         div(
             cn!(flex, flex_col),
-            [
-                Back {
-                    label: "Go back to game",
-                }
-                .el(),
-                Quit { label: "Quit" }.el(),
-            ],
+            [Back("Go back to game").el(), Quit("Quit").el()],
         ),
     );
 

@@ -26,10 +26,9 @@ impl Plugin for SplashPlugin {
 }
 
 #[derive(Component, Clone)]
-struct Start {
-    label: &'static str,
-}
-render!(Start, |&Start { label }, slot| button(
+struct Start(&'static str);
+
+render!(Start, |&Start(label), slot| button(
     cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
     [text(cn!(text_5xl, text_black), label), slot]
 ));
@@ -38,10 +37,9 @@ on_click!(Start, (ResMut<NextState<AppState>>), |_, gamestate| {
 });
 
 #[derive(Component, Clone)]
-struct Quit {
-    label: &'static str,
-}
-render!(Quit, |&Quit { label }, slot| button(
+struct Quit(&'static str);
+
+render!(Quit, |&Quit(label), slot| button(
     cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
     [text(cn!(text_5xl, text_black), label), slot]
 ));
@@ -54,13 +52,7 @@ fn setup(mut commands: Commands) {
         cn!(h_full, w_full, flex, justify_center, items_center),
         div(
             cn!(flex, flex_col),
-            [
-                Start {
-                    label: "Start game",
-                }
-                .el(),
-                Quit { label: "Quit" }.el(),
-            ],
+            [Start("Start game").el(), Quit("Quit").el()],
         ),
     );
 
