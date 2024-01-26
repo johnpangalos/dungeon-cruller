@@ -192,63 +192,6 @@ pub fn button(
 }
 
 #[macro_export]
-macro_rules! on_update_system {
-    ($on_update:expr, $component:ty, ) => {
-        fn on_update(mut commands: Commands, mut query: Query<&mut $component>) {
-            for mut v in &mut query {
-                $on_update(&mut commands, &mut v);
-            }
-        }
-    };
-    ($on_update:expr, $component:ty, $a:ty) => {
-        fn on_update(mut commands: Commands, mut query: Query<&mut $component>, mut a: $a) {
-            for mut v in &mut query {
-                $on_update(&mut commands, &mut v, &mut a);
-            }
-        }
-    };
-    ($on_update:expr, $component:ty, $a:ty, $b:ty) => {
-        fn on_update(
-            mut commands: Commands,
-            mut query: Query<&mut $component>,
-            mut a: $a,
-            mut b: $b,
-        ) {
-            for mut v in &mut query {
-                $on_update(&mut commands, &mut v, &mut a, &mut b);
-            }
-        }
-    };
-    ($on_update:expr, $component:ty, $a:ty, $b:ty, $c:ty) => {
-        fn on_update(
-            mut commands: Commands,
-            mut query: Query<&mut $component>,
-            mut a: $a,
-            mut b: $b,
-            mut c: $c,
-        ) {
-            for mut v in &mut query {
-                $on_update(&mut commands, &mut v, &mut a, &mut b, &mut c);
-            }
-        }
-    };
-    ($on_update:expr, $component:ty, $a:ty, $b:ty, $c:ty, $d:ty) => {
-        fn on_update(
-            mut commands: Commands,
-            mut query: Query<&mut $component>,
-            mut a: $a,
-            mut b: $b,
-            mut c: $c,
-            mut d: $d,
-        ) {
-            for mut v in &mut query {
-                $on_update(&mut commands, &v, &mut a, &mut b, &mut c, &mut d);
-            }
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! run_click_system {
     ($on_update:expr, $component:ty, ) => {
         fn run_click_system(
