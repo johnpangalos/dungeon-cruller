@@ -4,18 +4,27 @@ mod player;
 mod scenes;
 mod walls;
 
-use bevy::prelude::*;
-use constants::GameState;
-use scenes::RootMainMenu;
+use bevy::{input::common_conditions::input_just_pressed, prelude::*};
+use constants::{AppState, GameState};
+use scenes::{PausePlugin, SplashPlugin};
 use styles::elements::StylesPlugin;
 
 fn main() {
     App::new()
+        .add_state::<AppState>()
         .add_state::<GameState>()
         .add_plugins((DefaultPlugins, StylesPlugin))
-        .add_plugins(RootMainMenu)
+        .add_plugins((SplashPlugin, PausePlugin))
         .add_systems(Startup, setup_camera)
-        .add_systems(OnEnter(GameState::Game), setup_game)
+        .add_systems(OnEnter(AppState::Game), setup_game)
+        .add_systems(
+            Update,
+            (
+                player::pause_game.run_if(in_state(GameState::Running)),
+                player::unpause_game.run_if(in_state(GameState::Paused)),
+            )
+                .run_if(input_just_pressed(KeyCode::Escape)),
+        )
         .add_systems(
             FixedUpdate,
             (
@@ -24,7 +33,8 @@ fn main() {
                 doors::print_collision,
             )
                 .chain()
-                .run_if(in_state(GameState::Game)),
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(GameState::Running)),
         )
         .add_event::<doors::CollisionEvent>()
         .run();

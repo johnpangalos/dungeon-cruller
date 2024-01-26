@@ -39,7 +39,7 @@ pub struct InteractionTextStyle {
 
 fn button_cursor_system(
     mut windows: Query<&mut Window>,
-    buttons: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
+    buttons: Query<&Interaction, (With<Button>)>,
 ) {
     for interaction in buttons.iter() {
         match interaction {
@@ -47,14 +47,14 @@ fn button_cursor_system(
                 for mut window in windows.iter_mut() {
                     window.cursor.icon = CursorIcon::Hand;
                 }
-                break;
+                return;
             }
             _ => {}
         }
+    }
 
-        for mut window in windows.iter_mut() {
-            window.cursor.icon = CursorIcon::Default;
-        }
+    for mut window in windows.iter_mut() {
+        window.cursor.icon = CursorIcon::Default;
     }
 }
 
@@ -249,9 +249,9 @@ macro_rules! on_update_system {
 }
 
 #[macro_export]
-macro_rules! on_click_system {
+macro_rules! run_click_system {
     ($on_update:expr, $component:ty, ) => {
-        fn on_click(
+        fn run_click_system(
             input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
         ) {
@@ -261,18 +261,14 @@ macro_rules! on_click_system {
 
             for v in query.iter() {
                 match v.1 {
-                    Interaction::Hovered => {
-                        if (input.just_released(MouseButton::Left)) {
-                            f()(&v)
-                        }
-                    }
+                    Interaction::Pressed | Interaction::Hovered => f()(&v),
                     _ => {}
                 }
             }
         }
     };
     ($on_click:expr, $component:ty, $a:ty) => {
-        fn on_click(
+        fn run_click_system(
             input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
@@ -294,7 +290,7 @@ macro_rules! on_click_system {
         }
     };
     ($on_click:expr, $component:ty, $a:ty, $b:ty) => {
-        fn on_click(
+        fn run_click_system(
             input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
@@ -317,7 +313,7 @@ macro_rules! on_click_system {
         }
     };
     ($on_click:expr, $component:ty, $a:ty, $b:ty, $c:ty) => {
-        fn on_click(
+        fn run_click_system(
             input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
@@ -341,7 +337,7 @@ macro_rules! on_click_system {
         }
     };
     ($on_click:expr, $component:ty, $a:ty, $b:ty, $c:ty, $d:ty) => {
-        fn on_click(
+        fn run_click_system(
             input: Res<Input<MouseButton>>,
             query: Query<(Entity, &Interaction), (Changed<Interaction>, With<$component>)>,
             mut a: $a,
@@ -371,7 +367,11 @@ macro_rules! on_click_system {
 macro_rules! on_click {
     ($component:ty, ($($queries:ty),*), $function:expr) => {
         impl $component {
-            on_click_system!($function, $component, $($queries),*);
+            run_click_system!($function, $component, $($queries),*);
+
+            fn on_click() -> bevy::ecs::schedule::NodeConfigs<std::boxed::Box<dyn bevy::prelude::System<In = (), Out = ()>>>  {
+                Self::run_click_system.run_if(bevy::input::common_conditions::input_just_released(MouseButton::Left))
+            }
         }
     };
 }

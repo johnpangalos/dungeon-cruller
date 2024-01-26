@@ -1,8 +1,16 @@
-use crate::constants;
+use crate::constants::{self, GameState};
 use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Player;
+
+pub fn pause_game(mut game_state: ResMut<NextState<GameState>>) {
+    game_state.set(GameState::Paused);
+}
+
+pub fn unpause_game(mut game_state: ResMut<NextState<GameState>>) {
+    game_state.set(GameState::Running);
+}
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
