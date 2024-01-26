@@ -7,6 +7,7 @@ impl Plugin for StylesPlugin {
         app.add_systems(
             Update,
             (
+                button_cursor_system,
                 interaction_style_system,
                 interaction_text_style_system,
                 interaction_background_color_system,
@@ -34,6 +35,27 @@ pub struct InteractionTextStyle {
     none: TextStyle,
     hover: TextStyle,
     pressed: TextStyle,
+}
+
+fn button_cursor_system(
+    mut windows: Query<&mut Window>,
+    buttons: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
+) {
+    for interaction in buttons.iter() {
+        match interaction {
+            Interaction::Hovered | Interaction::Pressed => {
+                for mut window in windows.iter_mut() {
+                    window.cursor.icon = CursorIcon::Hand;
+                }
+                break;
+            }
+            _ => {}
+        }
+
+        for mut window in windows.iter_mut() {
+            window.cursor.icon = CursorIcon::Default;
+        }
+    }
 }
 
 fn interaction_style_system(
