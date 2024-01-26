@@ -27,7 +27,7 @@ fn main() {
         .add_plugins((DefaultPlugins, StylesPlugin))
         .add_plugins((SplashPlugin, PausePlugin))
         .add_systems(Startup, setup_camera)
-        .add_systems(OnEnter(AppState::Game), setup_game)
+        .add_systems(OnEnter(AppState::SetupGame), setup_game)
         .add_systems(
             Update,
             (
@@ -59,6 +59,7 @@ fn setup_camera(mut commands: Commands) {
 
 fn setup_game(
     mut commands: Commands,
+    mut app_state: ResMut<NextState<AppState>>,
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
@@ -86,4 +87,6 @@ fn setup_game(
     commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Right));
     commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Bottom));
     commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Top));
+
+    app_state.set(AppState::Game);
 }

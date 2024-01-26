@@ -33,7 +33,7 @@ render!(Start, |&Start(label), slot| button(
     [text(cn!(text_5xl, text_black), label), slot]
 ));
 on_click!(Start, (ResMut<NextState<AppState>>), |_, gamestate| {
-    gamestate.set(AppState::Game);
+    gamestate.set(AppState::SetupGame);
 });
 
 #[derive(Component, Clone)]

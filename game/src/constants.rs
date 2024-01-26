@@ -20,6 +20,7 @@ pub const DOOR_COLOR: Color = Color::rgb(9.0, 0.0, 0.0);
 pub enum AppState {
     #[default]
     Splash,
+    SetupGame,
     Game,
 }
 
