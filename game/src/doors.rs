@@ -1,6 +1,7 @@
 use crate::constants;
 use crate::player;
 use crate::scenes::console_log;
+use bevy::render::primitives::Aabb;
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 
 pub enum DoorLocation {
@@ -17,6 +18,7 @@ pub struct Collider;
 pub struct DoorBundle {
     sprite_bundle: SpriteBundle,
     collider: Collider,
+    // aabb: Aabb,
 }
 
 #[derive(Event, Default)]
@@ -63,19 +65,21 @@ impl DoorLocation {
 
 impl DoorBundle {
     pub fn new(location: DoorLocation) -> DoorBundle {
+        let size = location.size();
         DoorBundle {
             sprite_bundle: SpriteBundle {
                 transform: Transform {
                     translation: location.position().extend(0.0),
-                    scale: location.size().extend(1.0),
                     ..default()
                 },
                 sprite: Sprite {
                     color: constants::DOOR_COLOR,
+                    custom_size: Some(size.clone()),
                     ..default()
                 },
                 ..default()
             },
+
             collider: Collider,
         }
     }
@@ -83,32 +87,36 @@ impl DoorBundle {
 
 pub fn check_door_collisions(
     _commands: Commands,
-    player_query: Query<&Transform, With<player::Player>>,
-    collider_query: Query<&Transform, With<Collider>>,
+    player_query: Query<(&Transform, &Aabb), With<player::Player>>,
+    collider_query: Query<(&Transform, &Aabb), With<Collider>>,
     mut collision_events: EventWriter<CollisionEvent>,
 ) {
-    let player_transform = player_query.single();
+    let (player_transform, player_aabb) = player_query.single();
 
-    for transform in &collider_query {
+    console_log(
+        "player position",
+        format!("{:?}", player_transform.translation),
+    );
+    console_log(
+        "player size",
+        format!("{:?}", player_transform.scale.truncate()),
+    );
+
+    for (i, (transform, aabb)) in collider_query.iter().enumerate() {
         console_log(
-            "player position",
-            format!("{:?}", player_transform.translation),
+            format!("transform position {}", i),
+            format!("{:?}", aabb.center),
         );
         console_log(
-            "player size",
-            format!("{:?}", player_transform.scale.truncate()),
-        );
-        console_log("transform position", format!("{:?}", transform.translation));
-        console_log(
-            "transform size",
-            format!("{:?}", transform.scale.truncate()),
+            format!("transform size {}", i),
+            format!("{:?}", aabb.half_extents),
         );
 
         let collision = collide(
-            player_transform.translation,
-            player_transform.scale.truncate(),
-            transform.translation,
-            transform.scale.truncate(),
+            player_transform.translation + Vec3::from(player_aabb.center),
+            player_aabb.half_extents.truncate() * Vec2::splat(2.),
+            transform.translation + Vec3::from(aabb.center),
+            aabb.half_extents.truncate() * Vec2::splat(2.),
         );
 
         if let Some(_collision) = collision {
@@ -120,6 +128,6 @@ pub fn check_door_collisions(
 pub fn print_collision(_commands: Commands, mut collision_events: EventReader<CollisionEvent>) {
     if !collision_events.is_empty() {
         collision_events.clear();
-        println!("collide!")
+        console_log("collision", "done");
     }
 }

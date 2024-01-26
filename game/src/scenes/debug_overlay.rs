@@ -2,6 +2,7 @@ use crate::constants::DebugState;
 use bevy::ecs::system::Insert;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
+use bevy::render::primitives::Aabb;
 use styles::elements::*;
 use styles::stylesheet::*;
 use styles::*;
@@ -11,18 +12,19 @@ use styles::*;
  * F1 shows the overlay, F2 clears it.
  */
 
-const ARRAY_REPEAT_VALUE: Option<(&'static str, String)> = None;
-static mut DEBUG: [Option<(&'static str, String)>; 100] = [ARRAY_REPEAT_VALUE; 100];
+const ARRAY_REPEAT_VALUE: Option<(String, String)> = None;
+static mut DEBUG: [Option<(String, String)>; 100] = [ARRAY_REPEAT_VALUE; 100];
 
-pub fn console_log(key: &'static str, value: impl ToString + 'static) {
+pub fn console_log(key: impl ToString, value: impl ToString) {
+    let key_string = key.to_string();
     for line in unsafe { DEBUG.iter_mut() } {
         match line {
             None => {
-                *line = Some((key, value.to_string()));
+                *line = Some((key_string, value.to_string()));
                 return;
             }
-            Some((k, _)) if *k == key => {
-                *line = Some((key, value.to_string()));
+            Some((k, _)) if *k == key_string => {
+                *line = Some((key_string, value.to_string()));
                 return;
             }
             _ => {}
@@ -38,8 +40,12 @@ impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
             .add_systems(OnEnter(DebugState::Visible), show_component::<DebugPlugin>)
-            .add_systems(OnEnter(DebugState::Hidden), hide_component::<DebugPlugin>)
+            .add_systems(
+                OnEnter(DebugState::Hidden),
+                (hide_component::<DebugPlugin>, hide_aabbs),
+            )
             .add_systems(Update, write_console_log)
+            .add_systems(Update, show_aabbs.run_if(in_state(DebugState::Visible)))
             .add_systems(
                 Update,
                 (
@@ -108,5 +114,17 @@ fn hide_component<T: Component>(mut to_hide: Query<&mut Visibility, With<T>>) {
 fn show_component<T: Component>(mut to_show: Query<&mut Visibility, With<T>>) {
     for mut visibility in &mut to_show {
         *visibility = Visibility::Visible;
+    }
+}
+
+fn show_aabbs(mut commands: Commands, aabbs: Query<Entity, (With<Aabb>, Without<AabbGizmo>)>) {
+    for entity in &aabbs {
+        commands.entity(entity).insert(AabbGizmo::default());
+    }
+}
+
+fn hide_aabbs(mut commands: Commands, aabbs: Query<Entity, (With<Aabb>, With<AabbGizmo>)>) {
+    for entity in &aabbs {
+        commands.entity(entity).remove::<AabbGizmo>();
     }
 }
