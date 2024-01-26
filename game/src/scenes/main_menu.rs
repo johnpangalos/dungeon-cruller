@@ -43,15 +43,11 @@ macro_rules! render {
 }
 
 #[derive(Component, Default)]
-struct ButtonMainMenu;
-render!(ButtonMainMenu, |_, slot| button(
+struct ButtonStartGame;
+render!(ButtonStartGame, |_, slot| button(
     cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
     slot
 ));
-
-#[derive(Component, Default)]
-struct ButtonStartGame;
-render!(ButtonStartGame, |_, slot| ButtonMainMenu.slot(slot));
 on_click!(
     ButtonStartGame,
     (ResMut<NextState<GameState>>),
@@ -62,7 +58,10 @@ on_click!(
 
 #[derive(Component, Default)]
 struct ButtonQuit;
-render!(ButtonQuit, |_, slot| ButtonMainMenu.slot(slot));
+render!(ButtonQuit, |_, slot| button(
+    cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
+    slot
+));
 on_click!(ButtonQuit, (EventWriter<AppExit>), |_, exit| {
     exit.send(AppExit)
 });
