@@ -12,11 +12,10 @@ pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Paused), setup_main_menu)
+        app.add_systems(OnEnter(GameState::Paused), setup)
             .add_systems(
                 Update,
-                (ButtonBack::on_click(), ButtonQuit::on_click())
-                    .run_if(in_state(GameState::Paused)),
+                (Back::on_click(), Quit::on_click()).run_if(in_state(GameState::Paused)),
             )
             .add_systems(
                 OnExit(GameState::Paused),
@@ -25,55 +24,41 @@ impl Plugin for PausePlugin {
     }
 }
 
-macro_rules! render {
-    ($component:ident, $element:expr) => {
-        impl Render for $component {
-            fn render(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
-                let e = render(parent, $element(&self, slot));
-
-                parent.add_command(Insert {
-                    entity: e,
-                    bundle: $component,
-                });
-
-                e
-            }
-        }
-    };
+#[derive(Component, Clone)]
+struct Back {
+    label: &'static str,
 }
-
-#[derive(Component, Default)]
-struct ButtonBack;
-render!(ButtonBack, |_, slot| button(
+render!(Back, |&Back { label }, slot| button(
     cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
-    slot
+    [text(cn!(text_5xl, text_black), label), slot]
 ));
-on_click!(
-    ButtonBack,
-    (ResMut<NextState<GameState>>),
-    |_, gamestate| {
-        gamestate.set(GameState::Running);
-    }
-);
+on_click!(Back, (ResMut<NextState<GameState>>), |_, gamestate| {
+    gamestate.set(GameState::Running);
+});
 
-#[derive(Component, Default)]
-struct ButtonQuit;
-render!(ButtonQuit, |_, slot| button(
+#[derive(Component, Clone)]
+struct Quit {
+    label: &'static str,
+}
+render!(Quit, |&Quit { label }, slot| button(
     cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
-    slot
+    [text(cn!(text_5xl, text_black), label), slot]
 ));
-on_click!(ButtonQuit, (EventWriter<AppExit>), |_, exit| {
+on_click!(Quit, (EventWriter<AppExit>), |_, exit| {
     exit.send(AppExit)
 });
 
-fn setup_main_menu(mut commands: Commands) {
+fn setup(mut commands: Commands) {
     let tree = div(
         cn!(h_full, w_full, flex, justify_center, items_center),
         div(
             cn!(flex, flex_col),
             [
-                ButtonBack.slot(text(cn!(text_5xl, text_black), "Go back to game")),
-                ButtonQuit.slot(text(cn!(text_5xl, text_black), "Quit")),
+                Back {
+                    label: "Go back to game",
+                }
+                .el(),
+                Quit { label: "Quit" }.el(),
             ],
         ),
     );

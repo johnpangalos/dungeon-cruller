@@ -5,16 +5,18 @@ mod scenes;
 mod walls;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
-use constants::{AppState, GameState};
-use scenes::{PausePlugin, SplashPlugin};
+use constants::{AppState, DebugState, GameState};
+use scenes::{DebugPlugin, PausePlugin, SplashPlugin};
 use styles::elements::StylesPlugin;
 
 fn main() {
     App::new()
         .add_state::<AppState>()
         .add_state::<GameState>()
+        .add_state::<DebugState>()
         .add_plugins((DefaultPlugins, StylesPlugin))
         .add_plugins((SplashPlugin, PausePlugin))
+        .add_plugins(DebugPlugin)
         .add_systems(Startup, setup_camera)
         .add_systems(OnEnter(AppState::Game), setup_game)
         .add_systems(

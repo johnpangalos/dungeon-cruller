@@ -39,12 +39,12 @@ pub struct InteractionTextStyle {
 
 fn button_cursor_system(
     mut windows: Query<&mut Window>,
-    buttons: Query<&Interaction, (With<Button>)>,
+    buttons: Query<&Interaction, With<Button>>,
 ) {
     for interaction in buttons.iter() {
         match interaction {
             Interaction::Hovered | Interaction::Pressed => {
-                for mut window in windows.iter_mut() {
+                for mut window in &mut windows {
                     window.cursor.icon = CursorIcon::Hand;
                 }
                 return;
@@ -53,7 +53,7 @@ fn button_cursor_system(
         }
     }
 
-    for mut window in windows.iter_mut() {
+    for mut window in &mut windows {
         window.cursor.icon = CursorIcon::Default;
     }
 }
@@ -61,7 +61,7 @@ fn button_cursor_system(
 fn interaction_style_system(
     mut query: Query<(&Interaction, &InteractionStyle, &mut Style), Changed<Interaction>>,
 ) {
-    for (interaction, state, mut style) in query.iter_mut() {
+    for (interaction, state, mut style) in &mut query {
         match interaction {
             Interaction::None => *style = state.none.clone(),
             Interaction::Hovered => *style = state.hover.clone(),
@@ -77,7 +77,7 @@ fn interaction_background_color_system(
         &mut BackgroundColor,
     )>,
 ) {
-    for (interaction, state, mut style) in query.iter_mut() {
+    for (interaction, state, mut style) in &mut query {
         match interaction {
             Interaction::None => *style = state.none.clone(),
             Interaction::Hovered => *style = state.hover.clone(),
@@ -89,7 +89,7 @@ fn interaction_background_color_system(
 fn interaction_text_style_system(
     mut query: Query<(&Interaction, &InteractionTextStyle, &mut Text), Changed<Interaction>>,
 ) {
-    for (interaction, state, mut style) in query.iter_mut() {
+    for (interaction, state, mut style) in &mut query {
         for section in style.sections.iter_mut() {
             match interaction {
                 Interaction::None => section.style = state.none.clone(),
@@ -195,14 +195,14 @@ pub fn button(
 macro_rules! on_update_system {
     ($on_update:expr, $component:ty, ) => {
         fn on_update(mut commands: Commands, mut query: Query<&mut $component>) {
-            for mut v in query.iter_mut() {
+            for mut v in &mut query {
                 $on_update(&mut commands, &mut v);
             }
         }
     };
     ($on_update:expr, $component:ty, $a:ty) => {
         fn on_update(mut commands: Commands, mut query: Query<&mut $component>, mut a: $a) {
-            for mut v in query.iter_mut() {
+            for mut v in &mut query {
                 $on_update(&mut commands, &mut v, &mut a);
             }
         }
@@ -214,7 +214,7 @@ macro_rules! on_update_system {
             mut a: $a,
             mut b: $b,
         ) {
-            for mut v in query.iter_mut() {
+            for mut v in &mut query {
                 $on_update(&mut commands, &mut v, &mut a, &mut b);
             }
         }
@@ -227,7 +227,7 @@ macro_rules! on_update_system {
             mut b: $b,
             mut c: $c,
         ) {
-            for mut v in query.iter_mut() {
+            for mut v in &mut query {
                 $on_update(&mut commands, &mut v, &mut a, &mut b, &mut c);
             }
         }
@@ -241,7 +241,7 @@ macro_rules! on_update_system {
             mut c: $c,
             mut d: $d,
         ) {
-            for mut v in query.iter_mut() {
+            for mut v in &mut query {
                 $on_update(&mut commands, &v, &mut a, &mut b, &mut c, &mut d);
             }
         }
@@ -259,7 +259,7 @@ macro_rules! run_click_system {
                 $on_update
             }
 
-            for v in query.iter() {
+            for v in &query {
                 match v.1 {
                     Interaction::Pressed | Interaction::Hovered => f()(&v),
                     _ => {}
@@ -277,7 +277,7 @@ macro_rules! run_click_system {
                 $on_click
             }
 
-            for v in query.iter() {
+            for v in &query {
                 match v.1 {
                     Interaction::Hovered => {
                         if (input.just_released(MouseButton::Left)) {
@@ -300,7 +300,7 @@ macro_rules! run_click_system {
                 $on_click
             }
 
-            for v in query.iter() {
+            for v in &query {
                 match v.1 {
                     Interaction::Hovered => {
                         if (input.just_released(MouseButton::Left)) {
@@ -324,7 +324,7 @@ macro_rules! run_click_system {
                 $on_click
             }
 
-            for v in query.iter() {
+            for v in &query {
                 match v.1 {
                     Interaction::Hovered => {
                         if (input.just_released(MouseButton::Left)) {
@@ -349,7 +349,7 @@ macro_rules! run_click_system {
                 $on_click
             }
 
-            for v in query.iter() {
+            for v in &query {
                 match v.1 {
                     Interaction::Hovered => {
                         if (input.just_released(MouseButton::Left)) {
@@ -371,6 +371,24 @@ macro_rules! on_click {
                 run_click_system!($function, $component, $($queries),*);
 
                 run_click_system.run_if(bevy::input::common_conditions::input_just_released(MouseButton::Left))
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! render {
+    ($component:ident, $element:expr) => {
+        impl Render for $component {
+            fn render(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
+                let e = render(parent, $element(self, slot));
+
+                parent.add_command(Insert {
+                    entity: e,
+                    bundle: self.clone(),
+                });
+
+                e
             }
         }
     };

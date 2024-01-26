@@ -1,5 +1,6 @@
 use crate::constants;
 use crate::player;
+use crate::scenes::console_log;
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 
 pub enum DoorLocation {
@@ -89,10 +90,20 @@ pub fn check_door_collisions(
     let player_transform = player_query.single();
 
     for transform in &collider_query {
-        // println!("player position {:?}", player_transform.translation);
-        // println!("player size {:?}", player_transform.scale.truncate());
-        // println!("transform position{:?}", transform.translation);
-        // println!("transform size {:?}", transform.scale.truncate());
+        console_log(
+            "player position",
+            format!("{:?}", player_transform.translation),
+        );
+        console_log(
+            "player size",
+            format!("{:?}", player_transform.scale.truncate()),
+        );
+        console_log("transform position", format!("{:?}", transform.translation));
+        console_log(
+            "transform size",
+            format!("{:?}", transform.scale.truncate()),
+        );
+
         let collision = collide(
             player_transform.translation,
             player_transform.scale.truncate(),
