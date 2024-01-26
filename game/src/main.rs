@@ -4,21 +4,28 @@ mod player;
 mod scenes;
 mod walls;
 
-use bevy::{
-    input::common_conditions::input_just_pressed, math::Vec3A, prelude::*, render::primitives::Aabb,
-};
+use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use constants::{AppState, DebugState, GameState};
 use scenes::{DebugPlugin, PausePlugin, SplashPlugin};
 use styles::elements::StylesPlugin;
 
 fn main() {
-    App::new()
-        .add_state::<AppState>()
+    let mut app = App::new();
+    #[cfg(debug_assertions)] // debug/dev builds only
+    {
+        use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+        use bevy::diagnostic::LogDiagnosticsPlugin;
+        app.add_state::<DebugState>().add_plugins((
+            FrameTimeDiagnosticsPlugin,
+            LogDiagnosticsPlugin::default(),
+            DebugPlugin,
+        ));
+    }
+
+    app.add_state::<AppState>()
         .add_state::<GameState>()
-        .add_state::<DebugState>()
         .add_plugins((DefaultPlugins, StylesPlugin))
         .add_plugins((SplashPlugin, PausePlugin))
-        .add_plugins(DebugPlugin)
         .add_systems(Startup, setup_camera)
         .add_systems(OnEnter(AppState::Game), setup_game)
         .add_systems(
@@ -41,8 +48,9 @@ fn main() {
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(GameState::Running)),
         )
-        .add_event::<doors::CollisionEvent>()
-        .run();
+        .add_event::<doors::CollisionEvent>();
+
+    app.run();
 }
 
 fn setup_camera(mut commands: Commands) {
