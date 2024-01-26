@@ -372,3 +372,23 @@ pub struct text_9xl;
 text_style!(text_9xl, |_, bundle| {
     bundle.font_size = 128.0;
 });
+
+// Visibility
+
+#[derive(Clone)]
+pub struct visible;
+node_style!(visible, |_, bundle| {
+    bundle.visibility = Visibility::Inherited
+});
+
+#[derive(Clone)]
+pub struct invisible;
+node_style!(invisible, |_, bundle| {
+    bundle.visibility = Visibility::Hidden
+});
+
+#[derive(Clone)]
+pub struct always_visible;
+node_style!(always_visible, |_, bundle| {
+    bundle.visibility = Visibility::Visible
+});

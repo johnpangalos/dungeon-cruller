@@ -6,6 +6,11 @@ use styles::elements::*;
 use styles::stylesheet::*;
 use styles::*;
 
+/**
+ * This is the debug overlay. You can print to it using the `console_log` function.
+ * F1 shows the overlay, F2 clears it.
+ */
+
 const ARRAY_REPEAT_VALUE: Option<(&'static str, String)> = None;
 static mut DEBUG: [Option<(&'static str, String)>; 100] = [ARRAY_REPEAT_VALUE; 100];
 
@@ -32,25 +37,35 @@ pub struct DebugPlugin;
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
-            .add_systems(OnEnter(DebugState::Visible), show::<DebugPlugin>)
-            .add_systems(Update, write_debug_system)
+            .add_systems(OnEnter(DebugState::Visible), show_component::<DebugPlugin>)
+            .add_systems(OnEnter(DebugState::Hidden), hide_component::<DebugPlugin>)
+            .add_systems(Update, write_console_log)
             .add_systems(
                 Update,
                 (
-                    show_debug.run_if(in_state(DebugState::Visible)),
-                    hide_debug.run_if(in_state(DebugState::Hidden)),
+                    show_console.run_if(in_state(DebugState::Hidden)),
+                    hide_console.run_if(in_state(DebugState::Visible)),
                 )
                     .run_if(input_just_pressed(KeyCode::F1)),
             )
-            .add_systems(OnExit(DebugState::Hidden), hide::<DebugPlugin>);
+            .add_systems(
+                Update,
+                clear_console.run_if(input_just_pressed(KeyCode::F2)),
+            );
     }
 }
 
-pub fn show_debug(mut debug_state: ResMut<NextState<DebugState>>) {
+pub fn clear_console() {
+    unsafe {
+        DEBUG = [ARRAY_REPEAT_VALUE; 100];
+    }
+}
+
+pub fn show_console(mut debug_state: ResMut<NextState<DebugState>>) {
     debug_state.set(DebugState::Visible);
 }
 
-pub fn hide_debug(mut debug_state: ResMut<NextState<DebugState>>) {
+pub fn hide_console(mut debug_state: ResMut<NextState<DebugState>>) {
     debug_state.set(DebugState::Hidden);
 }
 
@@ -64,7 +79,7 @@ fn setup(mut commands: Commands) {
     render_root(&mut commands, DebugPlugin, tree);
 }
 
-fn write_debug_system(mut query: Query<&mut Text, With<List>>) {
+fn write_console_log(mut query: Query<&mut Text, With<List>>) {
     unsafe {
         for mut text in &mut query {
             let style = text.sections[0].style.clone();
@@ -84,13 +99,13 @@ fn write_debug_system(mut query: Query<&mut Text, With<List>>) {
     }
 }
 
-fn hide<T: Component>(mut to_hide: Query<&mut Visibility, With<T>>) {
+fn hide_component<T: Component>(mut to_hide: Query<&mut Visibility, With<T>>) {
     for mut visibility in &mut to_hide {
         *visibility = Visibility::Hidden;
     }
 }
 
-fn show<T: Component>(mut to_show: Query<&mut Visibility, With<T>>) {
+fn show_component<T: Component>(mut to_show: Query<&mut Visibility, With<T>>) {
     for mut visibility in &mut to_show {
         *visibility = Visibility::Visible;
     }
