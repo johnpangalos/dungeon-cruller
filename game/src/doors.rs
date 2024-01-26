@@ -89,10 +89,10 @@ pub fn check_door_collisions(
     let player_transform = player_query.single();
 
     for transform in &collider_query {
-        println!("player position {:?}", player_transform.translation);
-        println!("player size {:?}", player_transform.scale.truncate());
-        println!("transform position{:?}", transform.translation);
-        println!("transform size {:?}", transform.scale.truncate());
+        // println!("player position {:?}", player_transform.translation);
+        // println!("player size {:?}", player_transform.scale.truncate());
+        // println!("transform position{:?}", transform.translation);
+        // println!("transform size {:?}", transform.scale.truncate());
         let collision = collide(
             player_transform.translation,
             player_transform.scale.truncate(),

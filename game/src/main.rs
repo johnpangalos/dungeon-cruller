@@ -1,14 +1,21 @@
 mod constants;
 mod doors;
 mod player;
+mod scenes;
 mod walls;
 
 use bevy::prelude::*;
+use constants::GameState;
+use scenes::RootMainMenu;
+use styles::elements::StylesPlugin;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Startup, setup)
+        .add_state::<GameState>()
+        .add_plugins((DefaultPlugins, StylesPlugin))
+        .add_plugins(RootMainMenu)
+        .add_systems(Startup, setup_camera)
+        .add_systems(OnEnter(GameState::Game), setup_game)
         .add_systems(
             FixedUpdate,
             (
@@ -16,19 +23,22 @@ fn main() {
                 doors::check_door_collisions,
                 doors::print_collision,
             )
-                .chain(),
+                .chain()
+                .run_if(in_state(GameState::Game)),
         )
         .add_event::<doors::CollisionEvent>()
         .run();
 }
 
-fn setup(
+fn setup_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
+}
+
+fn setup_game(
     mut commands: Commands,
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    commands.spawn(Camera2dBundle::default());
-
     // Rectangle
     commands.spawn((
         SpriteBundle {

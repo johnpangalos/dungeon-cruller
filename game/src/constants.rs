@@ -15,3 +15,10 @@ pub const DOOR_THICKNESS: f32 = 10.;
 pub const PLAYER_COLOR: Color = Color::rgb(0.0, 0.9, 0.0);
 pub const WALL_COLOR: Color = Color::rgb(0.0, 0.0, 0.0);
 pub const DOOR_COLOR: Color = Color::rgb(9.0, 0.0, 0.0);
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum GameState {
+    #[default]
+    MainMenu,
+    Game,
+}
