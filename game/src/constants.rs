@@ -30,10 +30,3 @@ pub enum GameState {
     Running,
     Paused,
 }
-
-#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
-pub enum DebugState {
-    #[default]
-    Hidden,
-    Visible,
-}

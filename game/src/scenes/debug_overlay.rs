@@ -1,4 +1,3 @@
-use crate::constants::DebugState;
 use bevy::ecs::system::Insert;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
@@ -6,6 +5,13 @@ use bevy::render::primitives::Aabb;
 use styles::elements::*;
 use styles::stylesheet::*;
 use styles::*;
+
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum DebugState {
+    #[default]
+    Hidden,
+    Visible,
+}
 
 /**
  * This is the debug overlay. You can print to it using the `console_log` function.
@@ -38,7 +44,8 @@ pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
+        app.add_state::<DebugState>()
+            .add_systems(Startup, setup)
             .add_systems(OnEnter(DebugState::Visible), show_component::<DebugPlugin>)
             .add_systems(
                 OnEnter(DebugState::Hidden),

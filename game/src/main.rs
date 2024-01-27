@@ -5,7 +5,7 @@ mod scenes;
 mod walls;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
-use constants::{AppState, DebugState, GameState};
+use constants::{AppState, GameState};
 use scenes::{DebugPlugin, PausePlugin, SplashPlugin};
 use styles::elements::StylesPlugin;
 
@@ -15,7 +15,7 @@ fn main() {
     {
         use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
         use bevy::diagnostic::LogDiagnosticsPlugin;
-        app.add_state::<DebugState>().add_plugins((
+        app.add_plugins((
             FrameTimeDiagnosticsPlugin,
             LogDiagnosticsPlugin::default(),
             DebugPlugin,
