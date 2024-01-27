@@ -7,18 +7,6 @@ pub struct PlayerBundle {
     player: Player,
 }
 
-#[derive(Component)]
-pub struct Hitpoints(pub u32);
-
-pub struct Item {
-    pub name: String,
-}
-
-#[derive(Component)]
-pub struct Inventory {
-    pub items: Vec<Item>,
-}
-
 impl PlayerBundle {
     pub fn new(position: Vec2) -> PlayerBundle {
         // Rectangle
@@ -39,6 +27,18 @@ impl PlayerBundle {
             },
         }
     }
+}
+
+#[derive(Component)]
+pub struct Life(pub u32);
+
+pub struct Item {
+    pub name: String,
+}
+
+#[derive(Component)]
+pub struct Inventory {
+    pub items: Vec<Item>,
 }
 
 #[derive(Component)]

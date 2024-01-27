@@ -126,6 +126,12 @@ node_style!(w_full, |_, bundle| {
 });
 
 #[derive(Clone)]
+pub struct w_16;
+node_style!(w_16, |_, bundle| {
+    bundle.style.width = Val::Px(64.0);
+});
+
+#[derive(Clone)]
 pub struct w_64;
 node_style!(w_64, |_, bundle| {
     bundle.style.width = Val::Px(256.0);
@@ -137,6 +143,12 @@ node_style!(w_64, |_, bundle| {
 pub struct h_full;
 node_style!(h_full, |_, bundle| {
     bundle.style.height = Val::Percent(100.0);
+});
+
+#[derive(Clone)]
+pub struct h_16;
+node_style!(h_16, |_, bundle| {
+    bundle.style.height = Val::Px(64.0);
 });
 
 #[derive(Clone)]

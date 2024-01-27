@@ -40,16 +40,16 @@ pub fn console_log(key: impl ToString, value: impl ToString) {
 
 #[derive(Component)]
 
-pub struct DebugPlugin;
+pub struct DebugOverlay;
 
-impl Plugin for DebugPlugin {
+impl Plugin for DebugOverlay {
     fn build(&self, app: &mut App) {
         app.add_state::<DebugState>()
             .add_systems(Startup, setup)
-            .add_systems(OnEnter(DebugState::Visible), show_component::<DebugPlugin>)
+            .add_systems(OnEnter(DebugState::Visible), show_component::<DebugOverlay>)
             .add_systems(
                 OnEnter(DebugState::Hidden),
-                (hide_component::<DebugPlugin>, hide_aabbs),
+                (hide_component::<DebugOverlay>, hide_aabbs),
             )
             .add_systems(Update, write_console_log)
             .add_systems(Update, show_aabbs.run_if(in_state(DebugState::Visible)))
@@ -89,7 +89,7 @@ render!(List, |_, _| text(cn!(text_4xl), ""));
 fn setup(mut commands: Commands) {
     let tree = div(cn!(flex, flex_col), List.el());
 
-    render_root(&mut commands, DebugPlugin, tree);
+    render_root(&mut commands, DebugOverlay, tree);
 }
 
 fn write_console_log(mut query: Query<&mut Text, With<List>>) {

@@ -9,19 +9,16 @@ use styles::*;
 
 #[derive(Component)]
 
-pub struct SplashPlugin;
+pub struct MainMenu;
 
-impl Plugin for SplashPlugin {
+impl Plugin for MainMenu {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::Splash), setup)
             .add_systems(
                 Update,
                 (Start::on_click(), Quit::on_click()).run_if(in_state(AppState::Splash)),
             )
-            .add_systems(
-                OnExit(AppState::Splash),
-                despawn_recursively::<SplashPlugin>,
-            );
+            .add_systems(OnExit(AppState::Splash), despawn_recursively::<MainMenu>);
     }
 }
 
@@ -56,7 +53,7 @@ fn setup(mut commands: Commands) {
         ),
     );
 
-    render_root(&mut commands, SplashPlugin, tree);
+    render_root(&mut commands, MainMenu, tree);
 }
 
 fn despawn_recursively<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {

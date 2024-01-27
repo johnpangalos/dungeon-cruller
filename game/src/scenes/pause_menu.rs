@@ -8,19 +8,16 @@ use styles::stylesheet::*;
 use styles::*;
 
 #[derive(Component)]
-pub struct PausePlugin;
+pub struct PauseMenu;
 
-impl Plugin for PausePlugin {
+impl Plugin for PauseMenu {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Paused), setup)
             .add_systems(
                 Update,
                 (Back::on_click(), Quit::on_click()).run_if(in_state(GameState::Paused)),
             )
-            .add_systems(
-                OnExit(GameState::Paused),
-                despawn_recursively::<PausePlugin>,
-            );
+            .add_systems(OnExit(GameState::Paused), despawn_recursively::<PauseMenu>);
     }
 }
 
@@ -55,7 +52,7 @@ fn setup(mut commands: Commands) {
         ),
     );
 
-    render_root(&mut commands, PausePlugin, tree);
+    render_root(&mut commands, PauseMenu, tree);
 }
 
 fn despawn_recursively<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {

@@ -6,7 +6,7 @@ mod walls;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use constants::{AppState, GameState};
-use scenes::{DebugPlugin, PausePlugin, SplashPlugin};
+use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
 use styles::elements::StylesPlugin;
 
 fn main() {
@@ -18,14 +18,14 @@ fn main() {
         app.add_plugins((
             FrameTimeDiagnosticsPlugin,
             LogDiagnosticsPlugin::default(),
-            DebugPlugin,
+            DebugOverlay,
         ));
     }
 
     app.add_state::<AppState>()
         .add_state::<GameState>()
         .add_plugins((DefaultPlugins, StylesPlugin))
-        .add_plugins((SplashPlugin, PausePlugin))
+        .add_plugins((MainMenu, PauseMenu, PlayerOverlay))
         .add_systems(Startup, setup_camera)
         .add_systems(OnEnter(AppState::SetupGame), setup_game)
         .add_systems(
