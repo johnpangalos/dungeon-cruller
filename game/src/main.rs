@@ -39,11 +39,7 @@ fn main() {
         )
         .add_systems(
             FixedUpdate,
-            (
-                player::move_player,
-                doors::check_door_collisions,
-                doors::print_collision,
-            )
+            (player::move_player)
                 .chain()
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(GameState::Running)),
