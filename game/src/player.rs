@@ -1,5 +1,7 @@
 use crate::constants::{self, GameState};
 use crate::doors::Collider;
+use crate::scenes::console_log;
+use crate::walls::Wall;
 use bevy::render::primitives::Aabb;
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 
@@ -58,8 +60,8 @@ pub fn unpause_game(mut game_state: ResMut<NextState<GameState>>) {
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    // query: Query<&mut Transform, With<Player>>,
     mut player_query: Query<(&mut Transform, &Aabb), With<Player>>,
+    wall_query: Query<(&Transform, &Aabb), (With<Wall>, Without<Player>)>,
     collider_query: Query<(&Transform, &Aabb), (With<Collider>, Without<Player>)>,
     time: Res<Time>,
 ) {
@@ -100,15 +102,41 @@ pub fn move_player(
         }
     }
 
-    let left_bound =
-        constants::LEFT_WALL + constants::WALL_THICKNESS / 2.0 + constants::PLAYER_SIZE.x / 2.0;
-    let right_bound =
-        constants::RIGHT_WALL - constants::WALL_THICKNESS / 2.0 - constants::PLAYER_SIZE.x / 2.0;
-    let top_bound =
-        constants::TOP_WALL - constants::WALL_THICKNESS / 2.0 - constants::PLAYER_SIZE.y / 2.0;
-    let bottom_bound =
-        constants::BOTTOM_WALL + constants::WALL_THICKNESS / 2.0 + constants::PLAYER_SIZE.y / 2.0;
+    console_log(
+        "player position",
+        format!("{:?}", player_transform.translation),
+    );
+    for (i, (transform, aabb)) in wall_query.iter().enumerate() {
+        let collision = collide(
+            player_transform.translation + Vec3::from(player_aabb.center),
+            player_aabb.half_extents.truncate() * Vec2::splat(2.),
+            transform.translation + Vec3::from(aabb.center),
+            aabb.half_extents.truncate() * Vec2::splat(2.),
+        );
+        if let Some(_collision) = collision {
+            console_log(
+                "wall position",
+                format!("{}, {:?}", i, transform.translation),
+            );
+            let left_bound = constants::LEFT_WALL
+                + constants::WALL_THICKNESS / 2.0
+                + constants::PLAYER_SIZE.x / 2.0;
+            let right_bound = constants::RIGHT_WALL
+                - constants::WALL_THICKNESS / 2.0
+                - constants::PLAYER_SIZE.x / 2.0;
+            let top_bound = constants::TOP_WALL
+                - constants::WALL_THICKNESS / 2.0
+                - constants::PLAYER_SIZE.y / 2.0;
+            let bottom_bound = constants::BOTTOM_WALL
+                + constants::WALL_THICKNESS / 2.0
+                + constants::PLAYER_SIZE.y / 2.0;
 
-    player_transform.translation.x = new_player_x_position.clamp(left_bound, right_bound);
-    player_transform.translation.y = new_player_y_position.clamp(bottom_bound, top_bound);
+            player_transform.translation.x = new_player_x_position.clamp(left_bound, right_bound);
+            player_transform.translation.y = new_player_y_position.clamp(bottom_bound, top_bound);
+            return;
+        }
+    }
+
+    player_transform.translation.x = new_player_x_position;
+    player_transform.translation.y = new_player_y_position;
 }

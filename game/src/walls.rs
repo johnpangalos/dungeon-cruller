@@ -11,7 +11,11 @@ pub enum WallLocation {
 #[derive(Bundle)]
 pub struct WallBundle {
     sprite_bundle: SpriteBundle,
+    wall: Wall,
 }
+
+#[derive(Component)]
+pub struct Wall;
 
 impl WallLocation {
     fn position(&self) -> Vec2 {
@@ -57,6 +61,7 @@ impl WallBundle {
                 },
                 ..default()
             },
+            wall: Wall,
         }
     }
 }
