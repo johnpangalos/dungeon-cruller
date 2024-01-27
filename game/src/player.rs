@@ -4,6 +4,7 @@ use bevy::prelude::*;
 #[derive(Bundle)]
 pub struct PlayerBundle {
     sprite_bundle: SpriteBundle,
+    life: Life,
     player: Player,
 }
 
@@ -13,6 +14,7 @@ impl PlayerBundle {
 
         PlayerBundle {
             player: Player,
+            life: Life(2),
             sprite_bundle: SpriteBundle {
                 transform: Transform {
                     translation: position.extend(0.),

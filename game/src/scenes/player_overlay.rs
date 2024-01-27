@@ -1,5 +1,6 @@
 use crate::constants::AppState;
-use bevy::app::AppExit;
+use crate::player::Life;
+use crate::player::Player;
 use bevy::ecs::system::Insert;
 use bevy::prelude::*;
 
@@ -19,19 +20,35 @@ impl Plugin for PlayerOverlay {
     }
 }
 
-fn update_life() {
-    ()
+fn update_life(
+    player: Query<&Life, (With<Player>, Changed<Life>)>,
+    mut query: Query<(&Heart, &mut UiImage)>,
+) {
+    if let Ok(Life(life)) = player.get_single() {
+        for (heart, mut image) in &mut query {
+            if life < &heart.0 {
+                image.texture = heart.2.clone();
+            } else {
+                image.texture = heart.1.clone();
+            }
+        }
+    }
 }
 
+#[derive(Component, Clone)]
+struct Heart(u32, Handle<Image>, Handle<Image>);
+render!(Heart, |heart, _| { img(cn!(h_16, w_16), heart.1.clone()) });
+
 fn setup(mut commands: Commands, asset_server: ResMut<AssetServer>) {
-    let heart_image = asset_server.load::<Image>("textures/heart.png");
+    let full = asset_server.load::<Image>("textures/heart.png");
+    let missing = asset_server.load::<Image>("textures/heart-missing.png");
 
     let tree = div(
         cn!(flex),
         [
-            img(cn!(h_16, w_16), heart_image.clone()),
-            img(cn!(h_16, w_16), heart_image.clone()),
-            img(cn!(h_16, w_16), heart_image.clone()),
+            Heart(1, full.clone(), missing.clone()).el(),
+            Heart(2, full.clone(), missing.clone()).el(),
+            Heart(3, full.clone(), missing.clone()).el(),
         ],
     );
 

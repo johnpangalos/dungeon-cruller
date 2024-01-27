@@ -324,7 +324,11 @@ macro_rules! render {
     ($component:ident, $element:expr) => {
         impl Render for $component {
             fn render(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
-                let e = render(parent, $element(self, slot));
+                fn f() -> impl Fn(&$component, Element) -> Element {
+                    $element
+                }
+
+                let e = render(parent, f()(self, slot));
 
                 parent.add_command(Insert {
                     entity: e,
@@ -385,11 +389,6 @@ pub fn render_root<T: Component>(commands: &mut Commands, component: T, tree: El
     commands.spawn(screen).with_children(|parent| {
         render(parent, tree);
     });
-}
-
-pub fn el(s: impl Render + 'static, children: impl IntoIterator<Item = Element>) -> Element {
-    let vec = children.into_iter().collect::<Vec<_>>();
-    Element::Dyn(Box::new(s), vec)
 }
 
 pub fn div(
