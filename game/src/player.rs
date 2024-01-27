@@ -1,5 +1,7 @@
 use crate::constants::{self, GameState};
-use bevy::prelude::*;
+use crate::doors::Collider;
+use bevy::render::primitives::Aabb;
+use bevy::{prelude::*, sprite::collide_aabb::collide};
 
 #[derive(Bundle)]
 pub struct PlayerBundle {
@@ -56,10 +58,12 @@ pub fn unpause_game(mut game_state: ResMut<NextState<GameState>>) {
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Player>>,
+    // query: Query<&mut Transform, With<Player>>,
+    mut player_query: Query<(&mut Transform, &Aabb), With<Player>>,
+    collider_query: Query<(&Transform, &Aabb), (With<Collider>, Without<Player>)>,
     time: Res<Time>,
 ) {
-    let mut player_transform = query.single_mut();
+    let (mut player_transform, player_aabb) = player_query.single_mut();
     let mut y_direction = 0.0;
     let mut x_direction = 0.0;
 
@@ -80,6 +84,21 @@ pub fn move_player(
         + x_direction * constants::PLAYER_SPEED * time.delta_seconds();
     let new_player_y_position = player_transform.translation.y
         + y_direction * constants::PLAYER_SPEED * time.delta_seconds();
+
+    for (_i, (transform, aabb)) in collider_query.iter().enumerate() {
+        let collision = collide(
+            player_transform.translation + Vec3::from(player_aabb.center),
+            player_aabb.half_extents.truncate() * Vec2::splat(2.),
+            transform.translation + Vec3::from(aabb.center),
+            aabb.half_extents.truncate() * Vec2::splat(2.),
+        );
+
+        if let Some(_collision) = collision {
+            player_transform.translation.x = new_player_x_position;
+            player_transform.translation.y = new_player_y_position;
+            return;
+        }
+    }
 
     let left_bound =
         constants::LEFT_WALL + constants::WALL_THICKNESS / 2.0 + constants::PLAYER_SIZE.x / 2.0;
