@@ -1,6 +1,34 @@
 use crate::constants::{self, GameState};
 use bevy::prelude::*;
 
+#[derive(Bundle)]
+pub struct PlayerBundle {
+    sprite_bundle: SpriteBundle,
+    player: Player,
+}
+
+impl PlayerBundle {
+    pub fn new(position: Vec2) -> PlayerBundle {
+        // Rectangle
+
+        PlayerBundle {
+            player: Player,
+            sprite_bundle: SpriteBundle {
+                transform: Transform {
+                    translation: position.extend(0.),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: constants::PLAYER_COLOR,
+                    custom_size: Some(constants::PLAYER_SIZE),
+                    ..default()
+                },
+                ..default()
+            },
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct Player;
 

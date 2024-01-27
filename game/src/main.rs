@@ -63,18 +63,7 @@ fn setup_game(
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    // Rectangle
-    commands.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color: constants::PLAYER_COLOR,
-                custom_size: Some(constants::PLAYER_SIZE),
-                ..default()
-            },
-            ..default()
-        },
-        player::Player,
-    ));
+    commands.spawn(player::PlayerBundle::new(Vec2::ZERO));
 
     // Walls
     commands.spawn(walls::WallBundle::new(walls::WallLocation::Left));
