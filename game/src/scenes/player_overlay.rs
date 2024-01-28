@@ -17,6 +17,7 @@ impl Plugin for PlayerOverlay {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::Game), setup)
             .add_plugins(UiMaterialPlugin::<CustomMaterial>::default())
+            .add_plugins(UiMaterialPlugin::<OutlineMaterial>::default())
             .add_systems(Update, (update_life).run_if(in_state(AppState::Game)))
             .add_systems(OnExit(AppState::Game), despawn_recursively::<PlayerOverlay>);
     }
@@ -24,16 +25,16 @@ impl Plugin for PlayerOverlay {
 
 fn update_life(
     player: Query<&Life, (With<Player>, Changed<Life>)>,
-    hearts: Query<(&Heart, &Handle<CustomMaterial>), With<Handle<CustomMaterial>>>,
-    mut ui_materials: ResMut<Assets<CustomMaterial>>,
+    hearts: Query<(&Heart, &Handle<OutlineMaterial>), With<Handle<OutlineMaterial>>>,
+    mut ui_materials: ResMut<Assets<OutlineMaterial>>,
 ) {
     if let Ok(Life(life)) = player.get_single() {
         for (heart, handle) in &hearts {
             let material = ui_materials.get_mut(handle).unwrap();
             if life < &heart.0 {
-                material.color = Color::BLACK;
+                material.image_tint = Color::BLACK;
             } else {
-                material.color = Color::WHITE;
+                material.image_tint = Color::WHITE;
             }
         }
     }
@@ -42,19 +43,26 @@ fn update_life(
 #[derive(Component, Clone, Debug)]
 struct Heart(u32);
 
-fn mat_heart(n: u32, material: Handle<CustomMaterial>) -> Element {
+fn mat_heart<T: UiMaterial>(n: u32, material: Handle<T>) -> Element {
     Heart(n).as_el(mat(cn!(h_16, w_16), material.clone()))
 }
 
 fn setup(
     mut commands: Commands,
     asset_server: ResMut<AssetServer>,
-    mut materials: ResMut<Assets<CustomMaterial>>,
+    mut materials: ResMut<Assets<OutlineMaterial>>,
 ) {
     let full = asset_server.load::<Image>("textures/heart.png");
 
-    let base = CustomMaterial {
-        color: Color::BLACK,
+    // let base = CustomMaterial {
+    //     color: Color::WHITE,
+    //     color_texture: full.clone(),
+    // };
+
+    let base = OutlineMaterial {
+        outline_color: Color::WHITE,
+        image_tint: Color::WHITE,
+        thickness: 0.04,
         color_texture: full.clone(),
     };
 
@@ -77,6 +85,25 @@ fn setup(
 fn despawn_recursively<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
         commands.entity(entity).despawn_recursive();
+    }
+}
+
+#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
+struct OutlineMaterial {
+    #[uniform(0)]
+    outline_color: Color,
+    #[uniform(0)]
+    image_tint: Color,
+    #[uniform(0)]
+    thickness: f32,
+    #[texture(1)]
+    #[sampler(2)]
+    color_texture: Handle<Image>,
+}
+
+impl UiMaterial for OutlineMaterial {
+    fn fragment_shader() -> ShaderRef {
+        "shaders/outline_shader.wgsl".into()
     }
 }
 
