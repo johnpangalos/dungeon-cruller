@@ -1,5 +1,6 @@
 use bevy::ecs::system::Insert;
 use bevy::input::common_conditions::input_just_pressed;
+use bevy::input::common_conditions::input_pressed;
 use bevy::prelude::*;
 use bevy::render::primitives::Aabb;
 use styles::elements::*;
@@ -51,7 +52,6 @@ impl Plugin for DebugOverlay {
                 OnEnter(DebugState::Hidden),
                 (hide_component::<DebugOverlay>, hide_aabbs),
             )
-            .add_systems(Update, write_console_log)
             .add_systems(Update, show_aabbs.run_if(in_state(DebugState::Visible)))
             .add_systems(
                 Update,
@@ -60,6 +60,21 @@ impl Plugin for DebugOverlay {
                     hide_console.run_if(in_state(DebugState::Visible)),
                 )
                     .run_if(input_just_pressed(KeyCode::F1)),
+            )
+            .add_systems(
+                Update,
+                (
+                    zoom_out_console_log.run_if(
+                        input_pressed(KeyCode::ControlLeft)
+                            .and_then(input_just_pressed(KeyCode::NumpadSubtract)),
+                    ),
+                    zoom_in_console_log.run_if(
+                        input_pressed(KeyCode::ControlLeft)
+                            .and_then(input_just_pressed(KeyCode::NumpadAdd)),
+                    ),
+                    write_console_log,
+                )
+                    .chain(),
             )
             .add_systems(
                 Update,
@@ -84,12 +99,12 @@ pub fn hide_console(mut debug_state: ResMut<NextState<DebugState>>) {
 
 #[derive(Component, Clone)]
 struct List;
-render!(List, |_, _| text(cn!(text_4xl), ""));
+render!(List, |_, _| text(cn!(text_2xl), ""));
 
 fn setup(mut commands: Commands) {
-    let tree = div(cn!(flex, flex_col), List.el());
+    let tree = div(cn!(flex, flex_col, h_full, w_full), List.el());
 
-    render_root(&mut commands, DebugOverlay, tree);
+    spawn_root_element(&mut commands, DebugOverlay, tree);
 }
 
 fn write_console_log(mut query: Query<&mut Text, With<List>>) {
@@ -108,6 +123,22 @@ fn write_console_log(mut query: Query<&mut Text, With<List>>) {
             }
 
             text.sections = sections;
+        }
+    }
+}
+
+fn zoom_out_console_log(mut query: Query<&mut Text, With<List>>) {
+    for mut text in &mut query {
+        for section in &mut text.sections {
+            section.style.font_size -= 1.;
+        }
+    }
+}
+
+fn zoom_in_console_log(mut query: Query<&mut Text, With<List>>) {
+    for mut text in &mut query {
+        for section in &mut text.sections {
+            section.style.font_size += 1.;
         }
     }
 }

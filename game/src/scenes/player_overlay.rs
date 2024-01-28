@@ -4,6 +4,8 @@ use crate::player::Player;
 use bevy::ecs::system::Insert;
 use bevy::prelude::*;
 
+use bevy::render::render_resource::AsBindGroup;
+use bevy::render::render_resource::ShaderRef;
 use styles::elements::*;
 use styles::stylesheet::*;
 use styles::*;
@@ -15,6 +17,7 @@ pub struct PlayerOverlay;
 impl Plugin for PlayerOverlay {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::Game), setup)
+            .add_plugins(UiMaterialPlugin::<CustomMaterial>::default())
             .add_systems(Update, (update_life).run_if(in_state(AppState::Game)))
             .add_systems(OnExit(AppState::Game), despawn_recursively::<PlayerOverlay>);
     }
@@ -22,41 +25,74 @@ impl Plugin for PlayerOverlay {
 
 fn update_life(
     player: Query<&Life, (With<Player>, Changed<Life>)>,
-    mut query: Query<(&Heart, &mut UiImage)>,
+    hearts: Query<(&Heart, &Handle<CustomMaterial>), With<Handle<CustomMaterial>>>,
+    mut ui_materials: ResMut<Assets<CustomMaterial>>,
 ) {
     if let Ok(Life(life)) = player.get_single() {
-        for (heart, mut image) in &mut query {
+        for (heart, handle) in &hearts {
+            let material = ui_materials.get_mut(handle).unwrap();
             if life < &heart.0 {
-                image.texture = heart.2.clone();
+                material.color = Color::BLACK;
             } else {
-                image.texture = heart.1.clone();
+                material.color = Color::WHITE;
             }
         }
     }
 }
 
-#[derive(Component, Clone)]
-struct Heart(u32, Handle<Image>, Handle<Image>);
-render!(Heart, |heart, _| { img(cn!(h_16, w_16), heart.1.clone()) });
+#[derive(Component, Clone, Debug)]
+struct Heart(u32);
+render_with!(Heart);
 
-fn setup(mut commands: Commands, asset_server: ResMut<AssetServer>) {
+fn mat_heart(n: u32, material: Handle<CustomMaterial>) -> Element {
+    Heart(n).as_el(mat(cn!(h_16, w_16), material.clone()))
+}
+
+fn setup(
+    mut commands: Commands,
+    asset_server: ResMut<AssetServer>,
+    mut materials: ResMut<Assets<CustomMaterial>>,
+) {
     let full = asset_server.load::<Image>("textures/heart.png");
-    let missing = asset_server.load::<Image>("textures/heart-missing.png");
+
+    let base = CustomMaterial {
+        color: Color::BLACK,
+        color_texture: full.clone(),
+    };
+
+    let heart_1 = materials.add(base.clone());
+    let heart_2 = materials.add(base.clone());
+    let heart_3 = materials.add(base.clone());
 
     let tree = div(
         cn!(flex),
         [
-            Heart(1, full.clone(), missing.clone()).el(),
-            Heart(2, full.clone(), missing.clone()).el(),
-            Heart(3, full.clone(), missing.clone()).el(),
+            mat_heart(1, heart_1),
+            mat_heart(2, heart_2),
+            mat_heart(3, heart_3),
         ],
     );
 
-    render_root(&mut commands, PlayerOverlay, tree);
+    spawn_root_element(&mut commands, PlayerOverlay, tree);
 }
 
 fn despawn_recursively<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
         commands.entity(entity).despawn_recursive();
+    }
+}
+
+#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
+struct CustomMaterial {
+    #[uniform(0)]
+    color: Color,
+    #[texture(1)]
+    #[sampler(2)]
+    color_texture: Handle<Image>,
+}
+
+impl UiMaterial for CustomMaterial {
+    fn fragment_shader() -> ShaderRef {
+        "shaders/heart_shader.wgsl".into()
     }
 }

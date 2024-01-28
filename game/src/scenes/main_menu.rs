@@ -53,7 +53,7 @@ fn setup(mut commands: Commands) {
         ),
     );
 
-    render_root(&mut commands, MainMenu, tree);
+    spawn_root_element(&mut commands, MainMenu, tree);
 }
 
 fn despawn_recursively<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {

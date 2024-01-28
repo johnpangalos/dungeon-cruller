@@ -23,14 +23,14 @@ pub struct InteractionBackgroundColor {
     pressed: BackgroundColor,
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct InteractionStyle {
     none: Style,
     hover: Style,
     pressed: Style,
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct InteractionTextStyle {
     none: TextStyle,
     hover: TextStyle,
@@ -100,17 +100,23 @@ fn interaction_text_style_system(
     }
 }
 
-pub trait Render {
-    fn render(&self, parent: &mut ChildBuilder, slot: Element) -> Entity;
+pub trait DynElement {
+    fn spawn(&self, parent: &mut ChildBuilder, slot: Element) -> Entity;
+}
+
+pub trait DynAs {
+    fn spawn_as(&self, parent: &mut ChildBuilder) -> Entity;
 }
 
 pub trait IntoElement {
     fn el(self) -> Element;
 
     fn slot(self, children: impl IntoIterator<Item = Element>) -> Element;
+
+    fn as_el(self, element: Element) -> Element;
 }
 
-impl<T: Render + 'static> IntoElement for T {
+impl<T: DynElement + 'static> IntoElement for T {
     fn el(self) -> Element {
         Element::Dyn(Box::new(self), vec![])
     }
@@ -119,10 +125,19 @@ impl<T: Render + 'static> IntoElement for T {
         let vec = children.into_iter().collect::<Vec<_>>();
         Element::Dyn(Box::new(self), vec)
     }
+
+    fn as_el(self, element: Element) -> Element {
+        Element::DynAs(Box::new(self), Box::new(element))
+    }
+}
+
+pub trait IntoMaterial<X: UiMaterial> {
+    fn material(self) -> MaterialNodeBundle<X>;
 }
 
 pub enum Element {
-    Dyn(Box<dyn Render>, Vec<Element>),
+    Dyn(Box<dyn DynElement>, Vec<Element>),
+    DynAs(Box<dyn DynElement>, Box<Element>),
     Fragment(Vec<Element>),
     Div(
         (
@@ -320,15 +335,12 @@ macro_rules! on_click {
 }
 
 #[macro_export]
-macro_rules! render {
-    ($component:ident, $element:expr) => {
-        impl Render for $component {
-            fn render(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
-                fn f() -> impl Fn(&$component, Element) -> Element {
-                    $element
-                }
-
-                let e = render(parent, f()(self, slot));
+/** Macro for creating IntoElement functions on a struct */
+macro_rules! render_with {
+    ($component:ident) => {
+        impl DynElement for $component {
+            fn spawn(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
+                let e = spawn_element(parent, slot);
 
                 parent.add_command(Insert {
                     entity: e,
@@ -341,20 +353,44 @@ macro_rules! render {
     };
 }
 
-pub fn render(parent: &mut ChildBuilder, element: Element) -> Entity {
+/** Macro for supplying a render function and IntoElement functions on a struct */
+#[macro_export]
+macro_rules! render {
+    ($component:ident, $element:expr) => {
+        impl DynElement for $component {
+            fn spawn(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
+                fn f() -> impl Fn(&$component, Element) -> Element {
+                    $element
+                }
+
+                let e = spawn_element(parent, f()(self, slot));
+
+                parent.add_command(Insert {
+                    entity: e,
+                    bundle: self.clone(),
+                });
+
+                e
+            }
+        }
+    };
+}
+
+pub fn spawn_element(parent: &mut ChildBuilder, element: Element) -> Entity {
     match element {
         Element::Fragment(children) => {
             for child in children {
-                render(parent, child);
+                spawn_element(parent, child);
             }
             parent.parent_entity()
         }
-        Element::Dyn(render, children) => render.render(parent, Element::Fragment(children)),
+        Element::Dyn(render, children) => render.spawn(parent, Element::Fragment(children)),
+        Element::DynAs(render, element) => render.spawn(parent, *element),
         Element::Div(div, children) => parent
             .spawn(div)
             .with_children(|current| {
                 for child in children {
-                    render(current, child);
+                    spawn_element(current, child);
                 }
             })
             .id(),
@@ -362,7 +398,7 @@ pub fn render(parent: &mut ChildBuilder, element: Element) -> Entity {
             .spawn(button)
             .with_children(|current| {
                 for child in children {
-                    render(current, child);
+                    spawn_element(current, child);
                 }
             })
             .id(),
@@ -372,7 +408,7 @@ pub fn render(parent: &mut ChildBuilder, element: Element) -> Entity {
     }
 }
 
-pub fn render_root<T: Component>(commands: &mut Commands, component: T, tree: Element) {
+pub fn spawn_root_element<T: Component>(commands: &mut Commands, component: T, tree: Element) {
     let screen = (
         component,
         NodeBundle {
@@ -387,7 +423,7 @@ pub fn render_root<T: Component>(commands: &mut Commands, component: T, tree: El
     );
 
     commands.spawn(screen).with_children(|parent| {
-        render(parent, tree);
+        spawn_element(parent, tree);
     });
 }
 
@@ -427,4 +463,50 @@ pub fn text(
     let bundle = TextBundle::from_section(text.to_string(), interaction_style.none.clone());
 
     Element::Text((bundle, Interaction::None, interaction_style))
+}
+
+pub fn mat<T: UiMaterial>(
+    class: impl Fn(MaterialNodeBundle<T>, Interaction) -> MaterialNodeBundle<T> + 'static,
+    material: Handle<T>,
+) -> Element {
+    let base = MaterialNodeBundle::<T> {
+        material,
+        ..Default::default()
+    };
+    let bundle = class(base.clone(), Interaction::None);
+    let bundle_none = class(base.clone(), Interaction::None);
+    let bundle_hover = class(base.clone(), Interaction::Hovered);
+    let bundle_pressed = class(base.clone(), Interaction::Pressed);
+
+    let interaction_style = InteractionStyle {
+        none: bundle_none.style,
+        hover: bundle_hover.style,
+        pressed: bundle_pressed.style,
+    };
+
+    Element::Dyn(
+        Box::new(MaterialElement {
+            bundle: (bundle, interaction_style),
+        }),
+        vec![],
+    )
+}
+
+// Materials are dynamic because of the UiMaterial generic needed for them to work
+struct MaterialElement<T: UiMaterial> {
+    bundle: (MaterialNodeBundle<T>, InteractionStyle),
+}
+
+impl<T: UiMaterial> DynElement for MaterialElement<T> {
+    fn spawn(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
+        let (bundle, interaction_style) = &self.bundle;
+        let entity = parent
+            .spawn((bundle.clone(), interaction_style.clone()))
+            .with_children(|current| {
+                spawn_element(current, slot);
+            })
+            .id();
+
+        entity
+    }
 }

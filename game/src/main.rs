@@ -24,7 +24,13 @@ fn main() {
 
     app.add_state::<AppState>()
         .add_state::<GameState>()
-        .add_plugins((DefaultPlugins, StylesPlugin))
+        .add_plugins((
+            DefaultPlugins.set(AssetPlugin {
+                mode: AssetMode::Processed,
+                ..default()
+            }),
+            StylesPlugin,
+        ))
         .add_plugins((MainMenu, PauseMenu, PlayerOverlay))
         .add_systems(Startup, setup_camera)
         .add_systems(OnEnter(AppState::SetupGame), setup_game)

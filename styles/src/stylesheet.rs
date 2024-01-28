@@ -55,6 +55,37 @@ macro_rules! apply_style {
     };
 }
 
+#[macro_export]
+macro_rules! apply_bundle_style {
+    ($component:ty, $name:ty, $function:expr, $property:ident, $($t:ty),*) => {
+        $(
+            impl ApplyStyle<$t> for $name {
+                fn style(&self, bundle: &mut $t) {
+                    fn f() -> impl Fn(&$name, &mut $component) {
+                        $function
+                    }
+                    f()(self, &mut bundle.$property);
+                }
+            }
+        )*
+
+    };
+}
+
+#[macro_export]
+macro_rules! apply_material_style {
+    ($component:ty, $name:ty, $function:expr, $property:ident) => {
+        impl<T: UiMaterial> ApplyStyle<MaterialNodeBundle<T>> for $name {
+            fn style(&self, bundle: &mut MaterialNodeBundle<T>) {
+                fn f() -> impl Fn(&$name, &mut $component) {
+                    $function
+                }
+                f()(self, &mut bundle.$property);
+            }
+        }
+    };
+}
+
 #[derive(Clone)]
 pub struct hover_<T>(pub T);
 
@@ -75,15 +106,54 @@ impl<T: ApplyStyle<Y>, Y> ApplyStyle<Y> for pressed_<T> {
 
 macro_rules! node_style {
     ($name:ty, $function:expr) => {
-        apply_style!(bevy::prelude::NodeBundle, $name, $function);
-        apply_style!(bevy::prelude::ImageBundle, $name, $function);
-        apply_style!(bevy::prelude::ButtonBundle, $name, $function);
+        apply_style!(Style, $name, $function);
+        apply_bundle_style!(
+            Style,
+            $name,
+            $function,
+            style,
+            NodeBundle,
+            ImageBundle,
+            ButtonBundle,
+            TextBundle
+        );
+        apply_material_style!(Style, $name, $function, style);
+    };
+}
+
+macro_rules! node_background_color {
+    ($name:ty, $function:expr) => {
+        apply_style!(BackgroundColor, $name, $function);
+        apply_bundle_style!(
+            BackgroundColor,
+            $name,
+            $function,
+            background_color,
+            NodeBundle,
+            ButtonBundle
+        );
+    };
+}
+
+macro_rules! visibility {
+    ($name:ty, $function:expr) => {
+        apply_style!(Visibility, $name, $function);
+        apply_bundle_style!(
+            Visibility,
+            $name,
+            $function,
+            visibility,
+            NodeBundle,
+            ButtonBundle,
+            TextBundle
+        );
+        apply_material_style!(Visibility, $name, $function, visibility);
     };
 }
 
 macro_rules! text_style {
     ($name:ty, $function:expr) => {
-        apply_style!(bevy::prelude::TextStyle, $name, $function);
+        apply_style!(TextStyle, $name, $function);
     };
 }
 
@@ -99,119 +169,119 @@ text_style!(font_family, |font_family(font), bundle| {
 
 #[derive(Clone)]
 pub struct flex;
-node_style!(flex, |_, bundle| {
-    bundle.style.display = Display::Flex;
+node_style!(flex, |_, style| {
+    style.display = Display::Flex;
 });
 
 // FLEX DIRECTION
 
 #[derive(Clone)]
 pub struct flex_col;
-node_style!(flex_col, |_, bundle| {
-    bundle.style.flex_direction = FlexDirection::Column;
+node_style!(flex_col, |_, style| {
+    style.flex_direction = FlexDirection::Column;
 });
 
 #[derive(Clone)]
 pub struct flex_row;
-node_style!(flex_row, |_, bundle| {
-    bundle.style.flex_direction = FlexDirection::Row;
+node_style!(flex_row, |_, style| {
+    style.flex_direction = FlexDirection::Row;
 });
 
 // WIDTH
 
 #[derive(Clone)]
 pub struct w_full;
-node_style!(w_full, |_, bundle| {
-    bundle.style.width = Val::Percent(100.0);
+node_style!(w_full, |_, style| {
+    style.width = Val::Percent(100.0);
 });
 
 #[derive(Clone)]
 pub struct w_16;
-node_style!(w_16, |_, bundle| {
-    bundle.style.width = Val::Px(64.0);
+node_style!(w_16, |_, style| {
+    style.width = Val::Px(64.0);
 });
 
 #[derive(Clone)]
 pub struct w_64;
-node_style!(w_64, |_, bundle| {
-    bundle.style.width = Val::Px(256.0);
+node_style!(w_64, |_, style| {
+    style.width = Val::Px(256.0);
 });
 
 // HEIGHT
 
 #[derive(Clone)]
 pub struct h_full;
-node_style!(h_full, |_, bundle| {
-    bundle.style.height = Val::Percent(100.0);
+node_style!(h_full, |_, style| {
+    style.height = Val::Percent(100.0);
 });
 
 #[derive(Clone)]
 pub struct h_16;
-node_style!(h_16, |_, bundle| {
-    bundle.style.height = Val::Px(64.0);
+node_style!(h_16, |_, style| {
+    style.height = Val::Px(64.0);
 });
 
 #[derive(Clone)]
 pub struct h_64;
-node_style!(h_64, |_, bundle| {
-    bundle.style.height = Val::Px(256.0);
+node_style!(h_64, |_, style| {
+    style.height = Val::Px(256.0);
 });
 
 // ALIGN ITEMS
 
 #[derive(Clone)]
 pub struct items_center;
-node_style!(items_center, |_, bundle| {
-    bundle.style.align_items = AlignItems::Center;
+node_style!(items_center, |_, style| {
+    style.align_items = AlignItems::Center;
 });
 #[derive(Clone)]
 pub struct items_start;
-node_style!(items_start, |_, bundle| {
-    bundle.style.align_items = AlignItems::FlexStart;
+node_style!(items_start, |_, style| {
+    style.align_items = AlignItems::FlexStart;
 });
 
 #[derive(Clone)]
 pub struct items_end;
-node_style!(items_end, |_, bundle| {
-    bundle.style.align_items = AlignItems::FlexEnd;
+node_style!(items_end, |_, style| {
+    style.align_items = AlignItems::FlexEnd;
 });
 
 // JUSTIFY CONTENT
 
 #[derive(Clone)]
 pub struct justify_center;
-node_style!(justify_center, |_, bundle| {
-    bundle.style.justify_content = JustifyContent::Center;
+node_style!(justify_center, |_, style| {
+    style.justify_content = JustifyContent::Center;
 });
 
 #[derive(Clone)]
 pub struct justify_between;
-node_style!(justify_between, |_, bundle| {
-    bundle.style.justify_content = JustifyContent::SpaceBetween;
+node_style!(justify_between, |_, style| {
+    style.justify_content = JustifyContent::SpaceBetween;
 });
 
 #[derive(Clone)]
 pub struct justify_around;
-node_style!(justify_around, |_, bundle| {
-    bundle.style.justify_content = JustifyContent::SpaceAround;
+node_style!(justify_around, |_, style| {
+    style.justify_content = JustifyContent::SpaceAround;
 });
 
 #[derive(Clone)]
 pub struct justify_evenly;
-node_style!(justify_evenly, |_, bundle| {
-    bundle.style.justify_content = JustifyContent::SpaceEvenly;
+node_style!(justify_evenly, |_, style| {
+    style.justify_content = JustifyContent::SpaceEvenly;
 });
 
 #[derive(Clone)]
 pub struct justify_start;
-node_style!(justify_start, |_, bundle| {
-    bundle.style.justify_content = JustifyContent::FlexStart;
+node_style!(justify_start, |_, style| {
+    style.justify_content = JustifyContent::FlexStart;
 });
 
 #[derive(Clone)]
 pub struct justify_end;
-node_style!(justify_end, |_, bundle| {
-    bundle.style.justify_content = JustifyContent::FlexEnd;
+node_style!(justify_end, |_, style| {
+    style.justify_content = JustifyContent::FlexEnd;
 });
 
 // TEXT COLORS
@@ -232,80 +302,80 @@ text_style!(text_black, |_, bundle| {
 
 #[derive(Clone)]
 pub struct bg_white;
-node_style!(bg_white, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::WHITE);
+node_background_color!(bg_white, |_, background_color| {
+    background_color.0 = Color::WHITE;
 });
 
 #[derive(Clone)]
 pub struct bg_black;
-node_style!(bg_black, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::BLACK);
+node_background_color!(bg_black, |_, background_color| {
+    background_color.0 = Color::BLACK;
 });
 
 #[derive(Clone)]
 pub struct bg_red_50;
-node_style!(bg_red_50, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(254, 242, 242));
+node_background_color!(bg_red_50, |_, background_color| {
+    background_color.0 = Color::rgb_u8(254, 242, 242);
 });
 
 #[derive(Clone)]
 pub struct bg_red_100;
-node_style!(bg_red_100, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(254, 226, 226));
+node_background_color!(bg_red_100, |_, background_color| {
+    background_color.0 = Color::rgb_u8(254, 226, 226);
 });
 
 #[derive(Clone)]
 pub struct bg_red_200;
-node_style!(bg_red_200, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(254, 202, 202));
+node_background_color!(bg_red_200, |_, background_color| {
+    background_color.0 = Color::rgb_u8(254, 202, 202);
 });
 
 #[derive(Clone)]
 pub struct bg_red_300;
-node_style!(bg_red_300, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(252, 165, 165));
+node_background_color!(bg_red_300, |_, background_color| {
+    background_color.0 = Color::rgb_u8(252, 165, 165);
 });
 
 #[derive(Clone)]
 pub struct bg_red_400;
-node_style!(bg_red_400, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(248, 113, 113));
+node_background_color!(bg_red_400, |_, background_color| {
+    background_color.0 = Color::rgb_u8(248, 113, 113);
 });
 
 #[derive(Clone)]
 pub struct bg_red_500;
-node_style!(bg_red_500, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(239, 68, 68));
+node_background_color!(bg_red_500, |_, background_color| {
+    background_color.0 = Color::rgb_u8(239, 68, 68);
 });
 
 #[derive(Clone)]
 pub struct bg_red_600;
-node_style!(bg_red_600, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(220, 38, 38));
+node_background_color!(bg_red_600, |_, background_color| {
+    background_color.0 = Color::rgb_u8(220, 38, 38);
 });
 
 #[derive(Clone)]
 pub struct bg_red_700;
-node_style!(bg_red_700, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(185, 28, 28));
+node_background_color!(bg_red_700, |_, background_color| {
+    background_color.0 = Color::rgb_u8(185, 28, 28);
 });
 
 #[derive(Clone)]
 pub struct bg_red_800;
-node_style!(bg_red_800, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(153, 27, 27));
+node_background_color!(bg_red_800, |_, background_color| {
+    background_color.0 = Color::rgb_u8(153, 27, 27);
 });
 
 #[derive(Clone)]
 pub struct bg_red_900;
-node_style!(bg_red_900, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(127, 29, 29));
+node_background_color!(bg_red_900, |_, background_color| {
+    background_color.0 = Color::rgb_u8(127, 29, 29);
 });
 
 #[derive(Clone)]
 pub struct bg_red_950;
-node_style!(bg_red_950, |_, bundle| {
-    bundle.background_color = BackgroundColor(Color::rgb_u8(69, 10, 10));
+node_background_color!(bg_red_950, |_, background_color| {
+    background_color.0 = Color::rgb_u8(69, 10, 10);
 });
 
 // TEXT SIZES
@@ -390,18 +460,18 @@ text_style!(text_9xl, |_, bundle| {
 
 #[derive(Clone)]
 pub struct visible;
-node_style!(visible, |_, bundle| {
-    bundle.visibility = Visibility::Inherited
+visibility!(visible, |_, visibility| {
+    *visibility = Visibility::Inherited
 });
 
 #[derive(Clone)]
 pub struct invisible;
-node_style!(invisible, |_, bundle| {
-    bundle.visibility = Visibility::Hidden
+visibility!(invisible, |_, visibility| {
+    *visibility = Visibility::Hidden
 });
 
 #[derive(Clone)]
 pub struct always_visible;
-node_style!(always_visible, |_, bundle| {
-    bundle.visibility = Visibility::Visible
+visibility!(always_visible, |_, visibility| {
+    *visibility = Visibility::Visible
 });
