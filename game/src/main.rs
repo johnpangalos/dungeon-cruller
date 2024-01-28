@@ -1,11 +1,13 @@
 mod constants;
 mod doors;
+mod materials;
 mod player;
 mod scenes;
 mod walls;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use constants::{AppState, GameState};
+use materials::ShaderPlugin;
 use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
 use styles::elements::StylesPlugin;
 
@@ -30,6 +32,7 @@ fn main() {
                 ..default()
             }),
             StylesPlugin,
+            ShaderPlugin,
         ))
         .add_plugins((MainMenu, PauseMenu, PlayerOverlay))
         .add_systems(Startup, setup_camera)
@@ -62,9 +65,19 @@ fn setup_camera(mut commands: Commands) {
 fn setup_game(
     mut commands: Commands,
     mut app_state: ResMut<NextState<AppState>>,
-    // mut meshes: ResMut<Assets<Mesh>>,
-    // mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: ResMut<AssetServer>,
 ) {
+    let floor = asset_server.load::<Image>("textures/wooden-floor.png");
+
+    commands.spawn(SpriteBundle {
+        texture: floor,
+        sprite: Sprite {
+            custom_size: Some(Vec2::new(800., 600.)),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+
     commands.spawn(player::PlayerBundle::new(Vec2::ZERO));
 
     // Walls

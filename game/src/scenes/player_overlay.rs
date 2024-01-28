@@ -1,10 +1,9 @@
 use crate::constants::AppState;
+use crate::materials::outline_material::OutlineMaterial;
 use crate::player::Life;
 use crate::player::Player;
 use bevy::prelude::*;
 
-use bevy::render::render_resource::AsBindGroup;
-use bevy::render::render_resource::ShaderRef;
 use styles::elements::*;
 use styles::stylesheet::*;
 use styles::*;
@@ -16,8 +15,6 @@ pub struct PlayerOverlay;
 impl Plugin for PlayerOverlay {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(AppState::Game), setup)
-            .add_plugins(UiMaterialPlugin::<CustomMaterial>::default())
-            .add_plugins(UiMaterialPlugin::<OutlineMaterial>::default())
             .add_systems(Update, (update_life).run_if(in_state(AppState::Game)))
             .add_systems(OnExit(AppState::Game), despawn_recursively::<PlayerOverlay>);
     }
@@ -54,11 +51,6 @@ fn setup(
 ) {
     let full = asset_server.load::<Image>("textures/heart.png");
 
-    // let base = CustomMaterial {
-    //     color: Color::WHITE,
-    //     color_texture: full.clone(),
-    // };
-
     let base = OutlineMaterial {
         outline_color: Color::WHITE,
         image_tint: Color::WHITE,
@@ -85,39 +77,5 @@ fn setup(
 fn despawn_recursively<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
         commands.entity(entity).despawn_recursive();
-    }
-}
-
-#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
-struct OutlineMaterial {
-    #[uniform(0)]
-    outline_color: Color,
-    #[uniform(0)]
-    image_tint: Color,
-    #[uniform(0)]
-    thickness: f32,
-    #[texture(1)]
-    #[sampler(2)]
-    color_texture: Handle<Image>,
-}
-
-impl UiMaterial for OutlineMaterial {
-    fn fragment_shader() -> ShaderRef {
-        "shaders/outline_shader.wgsl".into()
-    }
-}
-
-#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
-struct CustomMaterial {
-    #[uniform(0)]
-    color: Color,
-    #[texture(1)]
-    #[sampler(2)]
-    color_texture: Handle<Image>,
-}
-
-impl UiMaterial for CustomMaterial {
-    fn fragment_shader() -> ShaderRef {
-        "shaders/heart_shader.wgsl".into()
     }
 }
