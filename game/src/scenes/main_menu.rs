@@ -1,6 +1,5 @@
 use crate::constants::AppState;
 use bevy::app::AppExit;
-use bevy::ecs::system::Insert;
 use bevy::prelude::*;
 
 use styles::elements::*;
@@ -23,33 +22,30 @@ impl Plugin for MainMenu {
 }
 
 #[derive(Component, Clone)]
-struct Start(&'static str);
-
-render!(Start, |&Start(label), slot| button(
-    cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
-    [text(cn!(text_5xl, text_black), label), slot]
-));
+struct Start;
 on_click!(Start, (ResMut<NextState<AppState>>), |_, gamestate| {
     gamestate.set(AppState::SetupGame);
 });
 
 #[derive(Component, Clone)]
-struct Quit(&'static str);
-
-render!(Quit, |&Quit(label), slot| button(
-    cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
-    [text(cn!(text_5xl, text_black), label), slot]
-));
+struct Quit;
 on_click!(Quit, (EventWriter<AppExit>), |_, exit| {
     exit.send(AppExit)
 });
+
+fn menu_button(component: impl IntoElement, label: impl ToString) -> Element {
+    component.as_el(button(
+        cn!(w_full, bg_white, hover_(bg_red_600), pressed_(bg_red_800)),
+        text(cn!(text_5xl, text_black), label.to_string()),
+    ))
+}
 
 fn setup(mut commands: Commands) {
     let tree = div(
         cn!(h_full, w_full, flex, justify_center, items_center),
         div(
             cn!(flex, flex_col),
-            [Start("Start game").el(), Quit("Quit").el()],
+            [menu_button(Start, "Start game"), menu_button(Quit, "Quit")],
         ),
     );
 

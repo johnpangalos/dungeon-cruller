@@ -1,7 +1,6 @@
 use crate::constants::AppState;
 use crate::player::Life;
 use crate::player::Player;
-use bevy::ecs::system::Insert;
 use bevy::prelude::*;
 
 use bevy::render::render_resource::AsBindGroup;
@@ -42,7 +41,6 @@ fn update_life(
 
 #[derive(Component, Clone, Debug)]
 struct Heart(u32);
-render_with!(Heart);
 
 fn mat_heart(n: u32, material: Handle<CustomMaterial>) -> Element {
     Heart(n).as_el(mat(cn!(h_16, w_16), material.clone()))

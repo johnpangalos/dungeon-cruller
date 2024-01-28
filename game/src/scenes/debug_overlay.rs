@@ -1,4 +1,3 @@
-use bevy::ecs::system::Insert;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::input::common_conditions::input_pressed;
 use bevy::prelude::*;
@@ -99,10 +98,12 @@ pub fn hide_console(mut debug_state: ResMut<NextState<DebugState>>) {
 
 #[derive(Component, Clone)]
 struct List;
-render!(List, |_, _| text(cn!(text_2xl), ""));
 
 fn setup(mut commands: Commands) {
-    let tree = div(cn!(flex, flex_col, h_full, w_full), List.el());
+    let tree = div(
+        cn!(flex, flex_col, h_full, w_full),
+        List.as_el(text(cn!(text_2xl), "")),
+    );
 
     spawn_root_element(&mut commands, DebugOverlay, tree);
 }

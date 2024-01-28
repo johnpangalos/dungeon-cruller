@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{ecs::system::Insert, prelude::*};
 
 pub struct StylesPlugin;
 
@@ -109,23 +109,10 @@ pub trait DynAs {
 }
 
 pub trait IntoElement {
-    fn el(self) -> Element;
-
-    fn slot(self, children: impl IntoIterator<Item = Element>) -> Element;
-
     fn as_el(self, element: Element) -> Element;
 }
 
 impl<T: DynElement + 'static> IntoElement for T {
-    fn el(self) -> Element {
-        Element::Dyn(Box::new(self), vec![])
-    }
-
-    fn slot(self, children: impl IntoIterator<Item = Element>) -> Element {
-        let vec = children.into_iter().collect::<Vec<_>>();
-        Element::Dyn(Box::new(self), vec)
-    }
-
     fn as_el(self, element: Element) -> Element {
         Element::DynAs(Box::new(self), Box::new(element))
     }
@@ -334,46 +321,17 @@ macro_rules! on_click {
     };
 }
 
-#[macro_export]
-/** Macro for creating IntoElement functions on a struct */
-macro_rules! render_with {
-    ($component:ident) => {
-        impl DynElement for $component {
-            fn spawn(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
-                let e = spawn_element(parent, slot);
+impl<T: Bundle + Clone> DynElement for T {
+    fn spawn(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
+        let e = spawn_element(parent, slot);
 
-                parent.add_command(Insert {
-                    entity: e,
-                    bundle: self.clone(),
-                });
+        parent.add_command(Insert {
+            entity: e,
+            bundle: self.clone(),
+        });
 
-                e
-            }
-        }
-    };
-}
-
-/** Macro for supplying a render function and IntoElement functions on a struct */
-#[macro_export]
-macro_rules! render {
-    ($component:ident, $element:expr) => {
-        impl DynElement for $component {
-            fn spawn(&self, parent: &mut ChildBuilder, slot: Element) -> Entity {
-                fn f() -> impl Fn(&$component, Element) -> Element {
-                    $element
-                }
-
-                let e = spawn_element(parent, f()(self, slot));
-
-                parent.add_command(Insert {
-                    entity: e,
-                    bundle: self.clone(),
-                });
-
-                e
-            }
-        }
-    };
+        e
+    }
 }
 
 pub fn spawn_element(parent: &mut ChildBuilder, element: Element) -> Entity {
