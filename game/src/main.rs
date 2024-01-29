@@ -81,6 +81,8 @@ fn setup_camera(mut commands: Commands) {
                 min_width: 1920.,
                 min_height: 1080.,
             },
+            near: -1000.0,
+            far: 1000.0,
             ..default()
         },
 
@@ -107,7 +109,7 @@ fn setup_game(
     // Floor
     commands.spawn(SpriteBundle {
         texture: floor,
-        transform: Transform::from_translation(Vec3::new(0., 0., -1.)),
+        transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
         sprite: Sprite {
             custom_size: Some(Vec2::new(constants::FLOOR_WIDTH, constants::FLOOR_HEIGHT)),
             ..Default::default()

@@ -1,6 +1,9 @@
 use std::ops::Mul;
 
-use crate::{constants::{self, GameState, PLAYER_SPEED}, scenes::console_log};
+use crate::{
+    constants::{self, GameState, PLAYER_SPEED},
+    scenes::console_log,
+};
 use bevy::prelude::*;
 use bevy_rapier2d::{
     dynamics::{RigidBody, Velocity},
@@ -26,10 +29,7 @@ impl PlayerBundle {
             player: Player,
             life: Life(2),
             sprite_bundle: SpriteBundle {
-                transform: Transform {
-                    translation: position.extend(1.),
-                    ..default()
-                },
+                transform: Transform::from_translation(position.extend(3.)),
                 texture: image,
                 sprite: Sprite {
                     custom_size: Some(constants::PLAYER_SIZE),
@@ -97,13 +97,9 @@ fn input_as_axis(
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut player_query: Query<(&Transform, &mut Velocity, &Speed), With<Player>>,
+    mut player_query: Query<(&mut Velocity, &Speed), With<Player>>,
 ) {
-    let (t, mut velocity, Speed(speed)) = player_query.single_mut();
-
-
-    console_log("key", format!("{:?}", t));
-    
+    let (mut velocity, Speed(speed)) = player_query.single_mut();
 
     let axis = input_as_axis(
         keyboard_input,

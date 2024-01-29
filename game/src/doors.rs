@@ -19,38 +19,18 @@ pub struct CollisionEvent;
 impl DoorLocation {
     fn position(&self) -> Vec2 {
         match self {
-            DoorLocation::Left => {
-                Vec2::new(constants::LEFT_WALL + constants::DOOR_THICKNESS / 2., 0.)
-            }
-            DoorLocation::Right => {
-                Vec2::new(constants::RIGHT_WALL - constants::DOOR_THICKNESS / 2., 0.)
-            }
-            DoorLocation::Bottom => {
-                Vec2::new(0., constants::BOTTOM_WALL + constants::DOOR_THICKNESS / 2.)
-            }
-            DoorLocation::Top => {
-                Vec2::new(0., constants::TOP_WALL - constants::DOOR_THICKNESS / 2.)
-            }
+            DoorLocation::Left => Vec2::new(-100., 0.),
+            DoorLocation::Right => Vec2::new(100., 0.),
+            DoorLocation::Bottom => Vec2::new(0., 100.),
+            DoorLocation::Top => Vec2::new(0., -100.),
         }
     }
     fn size(&self) -> Vec2 {
         match self {
-            DoorLocation::Right => Vec2::new(
-                constants::WALL_THICKNESS + constants::DOOR_THICKNESS,
-                constants::DOOR_WIDTH,
-            ),
-            DoorLocation::Left => Vec2::new(
-                constants::WALL_THICKNESS + constants::DOOR_THICKNESS,
-                constants::DOOR_WIDTH,
-            ),
-            DoorLocation::Top => Vec2::new(
-                constants::DOOR_WIDTH,
-                constants::WALL_THICKNESS + constants::DOOR_THICKNESS,
-            ),
-            DoorLocation::Bottom => Vec2::new(
-                constants::DOOR_WIDTH,
-                constants::WALL_THICKNESS + constants::DOOR_THICKNESS,
-            ),
+            DoorLocation::Right => Vec2::new(100., 100.),
+            DoorLocation::Left => Vec2::new(100., 100.),
+            DoorLocation::Top => Vec2::new(100., 100.),
+            DoorLocation::Bottom => Vec2::new(100., 100.),
         }
     }
 }
@@ -60,10 +40,7 @@ impl DoorBundle {
         let size = location.size();
         DoorBundle {
             sprite_bundle: SpriteBundle {
-                transform: Transform {
-                    translation: location.position().extend(0.0),
-                    ..default()
-                },
+                transform: Transform::from_translation(location.position().extend(2.)),
                 sprite: Sprite {
                     color: constants::DOOR_COLOR,
                     custom_size: Some(size.clone()),

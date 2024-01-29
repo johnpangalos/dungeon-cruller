@@ -38,7 +38,7 @@ impl WallBundle {
         WallBundle {
             sprite_bundle: SpriteBundle {
                 transform: Transform {
-                    translation: location.position().extend(-2.),
+                    translation: location.position().extend(0.),
                     ..default()
                 },
                 sprite: Sprite {
