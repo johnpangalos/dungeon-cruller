@@ -8,13 +8,9 @@ pub enum DoorLocation {
     Top,
 }
 
-#[derive(Component)]
-pub struct Collider;
-
 #[derive(Bundle)]
 pub struct DoorBundle {
     sprite_bundle: SpriteBundle,
-    collider: Collider,
 }
 
 #[derive(Event, Default)]
@@ -75,8 +71,6 @@ impl DoorBundle {
                 },
                 ..default()
             },
-
-            collider: Collider,
         }
     }
 }

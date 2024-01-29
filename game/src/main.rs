@@ -6,9 +6,13 @@ mod scenes;
 mod walls;
 
 use bevy::{input::common_conditions::input_just_pressed, prelude::*, window::*};
+use bevy_rapier2d::{
+    plugin::{NoUserData, RapierPhysicsPlugin},
+    render::RapierDebugRenderPlugin,
+};
 use constants::{AppState, GameState};
 use materials::ShaderPlugin;
-use scenes::{console_log, DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
+use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
 use styles::elements::StylesPlugin;
 
 fn main() {
@@ -18,6 +22,7 @@ fn main() {
         use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
         use bevy::diagnostic::LogDiagnosticsPlugin;
         app.add_plugins((
+            RapierDebugRenderPlugin::default(),
             FrameTimeDiagnosticsPlugin,
             LogDiagnosticsPlugin::default(),
             DebugOverlay,
@@ -40,6 +45,7 @@ fn main() {
                     }),
                     ..default()
                 }),
+            RapierPhysicsPlugin::<NoUserData>::default(),
             StylesPlugin,
             ShaderPlugin,
         ))

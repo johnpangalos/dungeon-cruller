@@ -3,7 +3,6 @@ use std::hash::Hash;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::input::common_conditions::input_pressed;
 use bevy::prelude::*;
-use bevy::render::primitives::Aabb;
 use styles::elements::*;
 use styles::stylesheet::*;
 use styles::*;
@@ -66,11 +65,7 @@ impl Plugin for DebugOverlay {
         app.add_state::<DebugState>()
             .add_systems(Startup, setup)
             .add_systems(OnEnter(DebugState::Visible), show_component::<DebugOverlay>)
-            .add_systems(
-                OnEnter(DebugState::Hidden),
-                (hide_component::<DebugOverlay>, hide_aabbs),
-            )
-            .add_systems(Update, show_aabbs.run_if(in_state(DebugState::Visible)))
+            .add_systems(OnEnter(DebugState::Hidden), hide_component::<DebugOverlay>)
             .add_systems(
                 Update,
                 (
@@ -178,17 +173,5 @@ fn hide_component<T: Component>(mut to_hide: Query<&mut Visibility, With<T>>) {
 fn show_component<T: Component>(mut to_show: Query<&mut Visibility, With<T>>) {
     for mut visibility in &mut to_show {
         *visibility = Visibility::Visible;
-    }
-}
-
-fn show_aabbs(mut commands: Commands, aabbs: Query<Entity, (With<Aabb>, Without<AabbGizmo>)>) {
-    for entity in &aabbs {
-        commands.entity(entity).insert(AabbGizmo::default());
-    }
-}
-
-fn hide_aabbs(mut commands: Commands, aabbs: Query<Entity, (With<Aabb>, With<AabbGizmo>)>) {
-    for entity in &aabbs {
-        commands.entity(entity).remove::<AabbGizmo>();
     }
 }
