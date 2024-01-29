@@ -63,7 +63,7 @@ fn setup(
     let heart_3 = materials.add(base.clone());
 
     let tree = div(
-        cn!(flex),
+        cn!(flex, p_10),
         [
             mat_heart(1, heart_1),
             mat_heart(2, heart_2),
