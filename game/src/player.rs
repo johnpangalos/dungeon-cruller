@@ -27,7 +27,7 @@ impl PlayerBundle {
             life: Life(2),
             sprite_bundle: SpriteBundle {
                 transform: Transform {
-                    translation: position.extend(0.),
+                    translation: position.extend(1.),
                     ..default()
                 },
                 texture: image,

@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
-pub const PLAYER_SIZE: Vec2 = Vec2::new(128.0, 128.0);
+pub const PLAYER_SIZE: Vec2 = Vec2::new(64.0, 64.0);
 pub const PLAYER_SPEED: f32 = 500.0;
 
 pub const WIDTH: f32 = 1920.;
 pub const HEIGHT: f32 = 1080.;
 
-pub const FLOOR_WIDTH: f32 = 1280.;
-pub const FLOOR_HEIGHT: f32 = 1040.;
+pub const FLOOR_WIDTH: f32 = 640.;
+pub const FLOOR_HEIGHT: f32 = 480.;
 
 pub const WALL_THICKNESS: f32 = 320.0;
 pub const LEFT_WALL: f32 = -FLOOR_WIDTH / 2. - WALL_THICKNESS;
