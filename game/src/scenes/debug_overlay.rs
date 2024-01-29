@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::input::common_conditions::input_pressed;
 use bevy::prelude::*;
@@ -20,6 +22,7 @@ pub enum DebugState {
 
 const ARRAY_REPEAT_VALUE: Option<(String, String)> = None;
 static mut DEBUG: [Option<(String, String)>; 100] = [ARRAY_REPEAT_VALUE; 100];
+static mut DEBUG_CHANGED: bool = true;
 
 /**
  * Prints a key-value pair to the debug overlay.
@@ -31,10 +34,22 @@ pub fn console_log(key: impl ToString, value: impl ToString) {
         match line {
             None => {
                 *line = Some((key_string, value.to_string()));
+                unsafe {
+                    DEBUG_CHANGED = true;
+                }
+
                 return;
             }
-            Some((k, _)) if *k == key_string => {
+            Some((k, existing_value)) if *k == key_string => {
+                if *existing_value == value.to_string() {
+                    return;
+                }
+
                 *line = Some((key_string, value.to_string()));
+                unsafe {
+                    DEBUG_CHANGED = true;
+                }
+
                 return;
             }
             _ => {}
@@ -105,7 +120,7 @@ struct List;
 
 fn setup(mut commands: Commands) {
     let tree = div(
-        cn!(flex, flex_col, h_full, w_full),
+        cn!(flex, flex_col, h_full, w_full, overflow_hidden),
         List.as_el(text(cn!(text_2xl), "")),
     );
 
@@ -114,6 +129,12 @@ fn setup(mut commands: Commands) {
 
 fn write_console_log(mut query: Query<&mut Text, With<List>>) {
     unsafe {
+        let debug_changed = DEBUG_CHANGED.clone();
+        DEBUG_CHANGED = false;
+        if !debug_changed {
+            return;
+        }
+
         for mut text in &mut query {
             let style = text.sections[0].style.clone();
             let mut sections = vec![TextSection::new("DEBUG\n", style.clone())];

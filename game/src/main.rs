@@ -8,7 +8,7 @@ mod walls;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*, window::*};
 use constants::{AppState, GameState};
 use materials::ShaderPlugin;
-use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
+use scenes::{console_log, DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
 use styles::elements::StylesPlugin;
 
 fn main() {

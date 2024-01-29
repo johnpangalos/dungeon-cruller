@@ -1960,3 +1960,46 @@ node_style!(px_96, |_, style| {
     style.padding.left = Val::Px(384.0);
     style.padding.right = Val::Px(384.0);
 });
+
+// OVERFLOW VISIBILITY
+#[derive(Clone)]
+pub struct overflow_hidden;
+node_style!(overflow_hidden, |_, style| {
+    style.overflow = Overflow {
+        x: OverflowAxis::Clip,
+        y: OverflowAxis::Clip,
+    };
+});
+
+#[derive(Clone)]
+pub struct overflow_x_hidden;
+node_style!(overflow_x_hidden, |_, style| {
+    style.overflow.x = OverflowAxis::Clip;
+});
+
+#[derive(Clone)]
+pub struct overflow_y_hidden;
+node_style!(overflow_y_hidden, |_, style| {
+    style.overflow.y = OverflowAxis::Clip;
+});
+
+#[derive(Clone)]
+pub struct overflow_visible;
+node_style!(overflow_visible, |_, style| {
+    style.overflow = Overflow {
+        x: OverflowAxis::Visible,
+        y: OverflowAxis::Visible,
+    };
+});
+
+#[derive(Clone)]
+pub struct overflow_x_visible;
+node_style!(overflow_x_visible, |_, style| {
+    style.overflow.x = OverflowAxis::Visible;
+});
+
+#[derive(Clone)]
+pub struct overflow_y_visible;
+node_style!(overflow_y_visible, |_, style| {
+    style.overflow.y = OverflowAxis::Visible;
+});
