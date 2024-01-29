@@ -94,9 +94,7 @@ pub fn move_player(
         );
 
         if let Some(_collision) = collision {
-            player_transform.translation.x = new_player_x_position;
-            player_transform.translation.y = new_player_y_position;
-            return;
+            // Do nothing for now
         }
     }
 
