@@ -11,7 +11,7 @@ pub struct PlayerBundle {
 }
 
 impl PlayerBundle {
-    pub fn new(position: Vec2) -> PlayerBundle {
+    pub fn new(position: Vec2, image: Handle<Image>) -> PlayerBundle {
         // Rectangle
 
         PlayerBundle {
@@ -22,8 +22,8 @@ impl PlayerBundle {
                     translation: position.extend(0.),
                     ..default()
                 },
+                texture: image,
                 sprite: Sprite {
-                    color: constants::PLAYER_COLOR,
                     custom_size: Some(constants::PLAYER_SIZE),
                     ..default()
                 },

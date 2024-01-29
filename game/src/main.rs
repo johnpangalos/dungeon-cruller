@@ -77,6 +77,7 @@ fn setup_game(
     asset_server: ResMut<AssetServer>,
 ) {
     let floor = asset_server.load::<Image>("textures/wooden-floor.png");
+    let player = asset_server.load::<Image>("textures/cat.png");
 
     commands.spawn(SpriteBundle {
         texture: floor,
@@ -90,7 +91,7 @@ fn setup_game(
         ..Default::default()
     });
 
-    commands.spawn(player::PlayerBundle::new(Vec2::ZERO));
+    commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
 
     // Walls
     commands.spawn(walls::WallBundle::new(walls::WallLocation::Left));

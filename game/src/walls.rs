@@ -23,19 +23,19 @@ impl WallLocation {
         }
     }
     fn size(&self) -> Vec2 {
-        let areana_height = constants::TOP_WALL - constants::BOTTOM_WALL;
-        let areana_width = constants::RIGHT_WALL - constants::LEFT_WALL;
+        let arena_height = constants::TOP_WALL - constants::BOTTOM_WALL;
+        let arena_width = constants::RIGHT_WALL - constants::LEFT_WALL;
 
-        assert!(areana_height > 0.0);
-        assert!(areana_width > 0.0);
+        assert!(arena_height > 0.0);
+        assert!(arena_width > 0.0);
 
         match self {
             WallLocation::Left | WallLocation::Right => Vec2::new(
                 constants::WALL_THICKNESS,
-                areana_height + constants::WALL_THICKNESS,
+                arena_height + constants::WALL_THICKNESS,
             ),
             WallLocation::Bottom | WallLocation::Top => Vec2::new(
-                areana_width + constants::WALL_THICKNESS,
+                arena_width + constants::WALL_THICKNESS,
                 constants::WALL_THICKNESS,
             ),
         }

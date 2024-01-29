@@ -21,6 +21,10 @@ pub enum DebugState {
 const ARRAY_REPEAT_VALUE: Option<(String, String)> = None;
 static mut DEBUG: [Option<(String, String)>; 100] = [ARRAY_REPEAT_VALUE; 100];
 
+/**
+ * Prints a key-value pair to the debug overlay.
+ */
+#[allow(dead_code)]
 pub fn console_log(key: impl ToString, value: impl ToString) {
     let key_string = key.to_string();
     for line in unsafe { DEBUG.iter_mut() } {
