@@ -41,7 +41,7 @@ fn update_life(
 struct Heart(u32);
 
 fn mat_heart<T: UiMaterial>(n: u32, material: Handle<T>) -> Element {
-    Heart(n).as_el(mat(cn!(h_16, w_16), material.clone()))
+    Heart(n).as_el(mat(cn!(h_12, w_12), material.clone()))
 }
 
 fn setup(
@@ -63,7 +63,7 @@ fn setup(
     let heart_3 = materials.add(base.clone());
 
     let tree = div(
-        cn!(flex, p_10),
+        cn!(flex, p_4),
         [
             mat_heart(1, heart_1),
             mat_heart(2, heart_2),

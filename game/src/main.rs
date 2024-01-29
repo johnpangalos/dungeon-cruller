@@ -5,7 +5,7 @@ mod player;
 mod scenes;
 mod walls;
 
-use bevy::{input::common_conditions::input_just_pressed, prelude::*};
+use bevy::{input::common_conditions::input_just_pressed, prelude::*, window::*};
 use constants::{AppState, GameState};
 use materials::ShaderPlugin;
 use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
@@ -28,10 +28,18 @@ fn main() {
         .insert_resource(ClearColor(Color::BLACK))
         .add_state::<GameState>()
         .add_plugins((
-            DefaultPlugins.set(AssetPlugin {
-                mode: AssetMode::Processed,
-                ..default()
-            }),
+            DefaultPlugins
+                .set(AssetPlugin {
+                    mode: AssetMode::Processed,
+                    ..default()
+                })
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        resolution: WindowResolution::new(constants::WIDTH, constants::HEIGHT),
+                        ..default()
+                    }),
+                    ..default()
+                }),
             StylesPlugin,
             ShaderPlugin,
         ))
@@ -73,7 +81,10 @@ fn setup_game(
     commands.spawn(SpriteBundle {
         texture: floor,
         sprite: Sprite {
-            custom_size: Some(Vec2::new(800., 600.)),
+            custom_size: Some(Vec2::new(
+                constants::WIDTH - constants::WALL_THICKNESS,
+                constants::HEIGHT - constants::WALL_THICKNESS,
+            )),
             ..Default::default()
         },
         ..Default::default()
