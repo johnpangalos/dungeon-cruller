@@ -8,7 +8,7 @@ resolver = "2"
 
 [dependencies]
 bevy_rapier2d = { version = "0.24.0", features = ["simd-stable"] }
-bevy = { version = "0.12.1", features = ["dynamic_linking"] }
+bevy = { version = "0.12.1", features = ["dynamic_linking", "file_watcher"] }
 styles = { path = "../styles" }
 
 # Enable a small amount of optimization in debug mode
