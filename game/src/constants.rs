@@ -13,7 +13,7 @@ pub const DOOR_WIDTH: f32 = 100.;
 pub const DOOR_THICKNESS: f32 = 2.;
 
 pub const PLAYER_COLOR: Color = Color::rgb(0.0, 0.9, 0.0);
-pub const WALL_COLOR: Color = Color::rgb(0.0, 0.0, 0.0);
+pub const WALL_COLOR: Color = Color::rgb(0.01, 0.01, 0.01);
 pub const DOOR_COLOR: Color = Color::rgb(9.0, 0.0, 0.0);
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
