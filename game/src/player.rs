@@ -92,7 +92,7 @@ fn input_as_axis(
         axis.y -= 1.0;
     }
 
-    axis
+    axis.normalize_or_zero()
 }
 
 pub fn move_player(
