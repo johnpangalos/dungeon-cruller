@@ -1472,11 +1472,479 @@ node_style!(pb_72, |_, style| {
 #[derive(Clone)]
 pub struct pb_80;
 node_style!(pb_80, |_, style| {
-    style.padding.top = Val::Px(320.0);
+    style.padding.bottom = Val::Px(320.0);
 });
 
 #[derive(Clone)]
 pub struct pb_96;
 node_style!(pb_96, |_, style| {
+    style.padding.bottom = Val::Px(384.0);
+});
+
+// PADDING VERTICAL
+
+#[derive(Clone)]
+pub struct py_0;
+node_style!(py_0, |_, style| {
+    style.padding.top = Val::Px(0.0);
+    style.padding.bottom = Val::Px(0.0);
+});
+
+#[derive(Clone)]
+pub struct py_1;
+node_style!(py_1, |_, style| {
+    style.padding.top = Val::Px(4.0);
+    style.padding.bottom = Val::Px(4.0);
+});
+
+#[derive(Clone)]
+pub struct py_1p5;
+node_style!(py_1p5, |_, style| {
+    style.padding.top = Val::Px(6.0);
+    style.padding.bottom = Val::Px(6.0);
+});
+
+#[derive(Clone)]
+pub struct py_2;
+node_style!(py_2, |_, style| {
+    style.padding.top = Val::Px(8.0);
+    style.padding.bottom = Val::Px(8.0);
+});
+
+#[derive(Clone)]
+pub struct py_2p5;
+node_style!(py_2p5, |_, style| {
+    style.padding.top = Val::Px(10.0);
+    style.padding.bottom = Val::Px(10.0);
+});
+
+#[derive(Clone)]
+pub struct py_3;
+node_style!(py_3, |_, style| {
+    style.padding.top = Val::Px(12.0);
+    style.padding.bottom = Val::Px(12.0);
+});
+
+#[derive(Clone)]
+pub struct py_3p5;
+node_style!(py_3p5, |_, style| {
+    style.padding.top = Val::Px(14.0);
+    style.padding.bottom = Val::Px(14.0);
+});
+
+#[derive(Clone)]
+pub struct py_4;
+node_style!(py_4, |_, style| {
+    style.padding.top = Val::Px(16.0);
+    style.padding.bottom = Val::Px(16.0);
+});
+
+#[derive(Clone)]
+
+pub struct py_5;
+node_style!(py_5, |_, style| {
+    style.padding.top = Val::Px(20.0);
+    style.padding.bottom = Val::Px(20.0);
+});
+
+#[derive(Clone)]
+pub struct py_6;
+node_style!(py_6, |_, style| {
+    style.padding.top = Val::Px(24.0);
+    style.padding.bottom = Val::Px(24.0);
+});
+
+#[derive(Clone)]
+pub struct py_7;
+node_style!(py_7, |_, style| {
+    style.padding.top = Val::Px(28.0);
+    style.padding.bottom = Val::Px(28.0);
+});
+
+#[derive(Clone)]
+pub struct py_8;
+node_style!(py_8, |_, style| {
+    style.padding.top = Val::Px(32.0);
+    style.padding.bottom = Val::Px(32.0);
+});
+
+#[derive(Clone)]
+pub struct py_9;
+node_style!(py_9, |_, style| {
+    style.padding.top = Val::Px(36.0);
+    style.padding.bottom = Val::Px(36.0);
+});
+
+#[derive(Clone)]
+pub struct py_10;
+node_style!(py_10, |_, style| {
+    style.padding.top = Val::Px(40.0);
+    style.padding.bottom = Val::Px(40.0);
+});
+
+#[derive(Clone)]
+pub struct py_11;
+node_style!(py_11, |_, style| {
+    style.padding.top = Val::Px(44.0);
+    style.padding.bottom = Val::Px(44.0);
+});
+
+#[derive(Clone)]
+pub struct py_12;
+node_style!(py_12, |_, style| {
+    style.padding.top = Val::Px(48.0);
+    style.padding.bottom = Val::Px(48.0);
+});
+
+#[derive(Clone)]
+pub struct py_14;
+node_style!(py_14, |_, style| {
+    style.padding.top = Val::Px(56.0);
+    style.padding.bottom = Val::Px(56.0);
+});
+
+#[derive(Clone)]
+pub struct py_16;
+node_style!(py_16, |_, style| {
+    style.padding.top = Val::Px(64.0);
+    style.padding.bottom = Val::Px(64.0);
+});
+
+#[derive(Clone)]
+pub struct py_20;
+node_style!(py_20, |_, style| {
+    style.padding.top = Val::Px(80.0);
+    style.padding.bottom = Val::Px(80.0);
+});
+
+#[derive(Clone)]
+pub struct py_24;
+node_style!(py_24, |_, style| {
+    style.padding.top = Val::Px(96.0);
+    style.padding.bottom = Val::Px(96.0);
+});
+
+#[derive(Clone)]
+pub struct py_28;
+node_style!(py_28, |_, style| {
+    style.padding.top = Val::Px(112.0);
+    style.padding.bottom = Val::Px(112.0);
+});
+
+#[derive(Clone)]
+pub struct py_32;
+node_style!(py_32, |_, style| {
+    style.padding.top = Val::Px(128.0);
+    style.padding.bottom = Val::Px(128.0);
+});
+
+#[derive(Clone)]
+pub struct py_36;
+node_style!(py_36, |_, style| {
+    style.padding.top = Val::Px(144.0);
+    style.padding.bottom = Val::Px(144.0);
+});
+
+#[derive(Clone)]
+pub struct py_40;
+node_style!(py_40, |_, style| {
+    style.padding.top = Val::Px(160.0);
+    style.padding.bottom = Val::Px(160.0);
+});
+
+#[derive(Clone)]
+pub struct py_44;
+node_style!(py_44, |_, style| {
+    style.padding.top = Val::Px(176.0);
+    style.padding.bottom = Val::Px(176.0);
+});
+
+#[derive(Clone)]
+pub struct py_48;
+node_style!(py_48, |_, style| {
+    style.padding.top = Val::Px(192.0);
+    style.padding.bottom = Val::Px(192.0);
+});
+
+#[derive(Clone)]
+pub struct py_52;
+node_style!(py_52, |_, style| {
+    style.padding.top = Val::Px(208.0);
+    style.padding.bottom = Val::Px(208.0);
+});
+
+#[derive(Clone)]
+pub struct py_56;
+node_style!(py_56, |_, style| {
+    style.padding.top = Val::Px(224.0);
+    style.padding.bottom = Val::Px(224.0);
+});
+
+#[derive(Clone)]
+pub struct py_60;
+node_style!(py_60, |_, style| {
+    style.padding.top = Val::Px(240.0);
+    style.padding.bottom = Val::Px(240.0);
+});
+
+#[derive(Clone)]
+pub struct py_64;
+node_style!(py_64, |_, style| {
+    style.padding.top = Val::Px(256.0);
+    style.padding.bottom = Val::Px(256.0);
+});
+
+#[derive(Clone)]
+pub struct py_72;
+node_style!(py_72, |_, style| {
+    style.padding.top = Val::Px(288.0);
+    style.padding.bottom = Val::Px(288.0);
+});
+
+#[derive(Clone)]
+pub struct py_80;
+node_style!(py_80, |_, style| {
+    style.padding.top = Val::Px(320.0);
+    style.padding.bottom = Val::Px(320.0);
+});
+
+#[derive(Clone)]
+pub struct py_96;
+node_style!(py_96, |_, style| {
     style.padding.top = Val::Px(384.0);
+    style.padding.bottom = Val::Px(384.0);
+});
+
+// PADDING HORIZONTAL
+
+#[derive(Clone)]
+pub struct px_0;
+node_style!(px_0, |_, style| {
+    style.padding.left = Val::Px(0.0);
+    style.padding.right = Val::Px(0.0);
+});
+
+#[derive(Clone)]
+pub struct px_1;
+node_style!(px_1, |_, style| {
+    style.padding.left = Val::Px(4.0);
+    style.padding.right = Val::Px(4.0);
+});
+
+#[derive(Clone)]
+pub struct px_1p5;
+node_style!(px_1p5, |_, style| {
+    style.padding.left = Val::Px(6.0);
+    style.padding.right = Val::Px(6.0);
+});
+
+#[derive(Clone)]
+pub struct px_2;
+node_style!(px_2, |_, style| {
+    style.padding.left = Val::Px(8.0);
+    style.padding.right = Val::Px(8.0);
+});
+
+#[derive(Clone)]
+pub struct px_2p5;
+node_style!(px_2p5, |_, style| {
+    style.padding.left = Val::Px(10.0);
+    style.padding.right = Val::Px(10.0);
+});
+
+#[derive(Clone)]
+pub struct px_3;
+node_style!(px_3, |_, style| {
+    style.padding.left = Val::Px(12.0);
+    style.padding.right = Val::Px(12.0);
+});
+
+#[derive(Clone)]
+pub struct px_3p5;
+node_style!(px_3p5, |_, style| {
+    style.padding.left = Val::Px(14.0);
+    style.padding.right = Val::Px(14.0);
+});
+
+#[derive(Clone)]
+pub struct px_4;
+node_style!(px_4, |_, style| {
+    style.padding.left = Val::Px(16.0);
+    style.padding.right = Val::Px(16.0);
+});
+
+#[derive(Clone)]
+
+pub struct px_5;
+node_style!(px_5, |_, style| {
+    style.padding.left = Val::Px(20.0);
+    style.padding.right = Val::Px(20.0);
+});
+
+#[derive(Clone)]
+pub struct px_6;
+node_style!(px_6, |_, style| {
+    style.padding.left = Val::Px(24.0);
+    style.padding.right = Val::Px(24.0);
+});
+
+#[derive(Clone)]
+pub struct px_7;
+node_style!(px_7, |_, style| {
+    style.padding.left = Val::Px(28.0);
+    style.padding.right = Val::Px(28.0);
+});
+
+#[derive(Clone)]
+pub struct px_8;
+node_style!(px_8, |_, style| {
+    style.padding.left = Val::Px(32.0);
+    style.padding.right = Val::Px(32.0);
+});
+
+#[derive(Clone)]
+pub struct px_9;
+node_style!(px_9, |_, style| {
+    style.padding.left = Val::Px(36.0);
+    style.padding.right = Val::Px(36.0);
+});
+
+#[derive(Clone)]
+pub struct px_10;
+node_style!(px_10, |_, style| {
+    style.padding.left = Val::Px(40.0);
+    style.padding.right = Val::Px(40.0);
+});
+
+#[derive(Clone)]
+pub struct px_11;
+node_style!(px_11, |_, style| {
+    style.padding.left = Val::Px(44.0);
+    style.padding.right = Val::Px(44.0);
+});
+
+#[derive(Clone)]
+pub struct px_12;
+node_style!(px_12, |_, style| {
+    style.padding.left = Val::Px(48.0);
+    style.padding.right = Val::Px(48.0);
+});
+
+#[derive(Clone)]
+pub struct px_14;
+node_style!(px_14, |_, style| {
+    style.padding.left = Val::Px(56.0);
+    style.padding.right = Val::Px(56.0);
+});
+
+#[derive(Clone)]
+pub struct px_16;
+node_style!(px_16, |_, style| {
+    style.padding.left = Val::Px(64.0);
+    style.padding.right = Val::Px(64.0);
+});
+
+#[derive(Clone)]
+pub struct px_20;
+node_style!(px_20, |_, style| {
+    style.padding.left = Val::Px(80.0);
+    style.padding.right = Val::Px(80.0);
+});
+
+#[derive(Clone)]
+pub struct px_24;
+node_style!(px_24, |_, style| {
+    style.padding.left = Val::Px(96.0);
+    style.padding.right = Val::Px(96.0);
+});
+
+#[derive(Clone)]
+pub struct px_28;
+node_style!(px_28, |_, style| {
+    style.padding.left = Val::Px(112.0);
+    style.padding.right = Val::Px(112.0);
+});
+
+#[derive(Clone)]
+pub struct px_32;
+node_style!(px_32, |_, style| {
+    style.padding.left = Val::Px(128.0);
+    style.padding.right = Val::Px(128.0);
+});
+
+#[derive(Clone)]
+pub struct px_36;
+node_style!(px_36, |_, style| {
+    style.padding.left = Val::Px(144.0);
+    style.padding.right = Val::Px(144.0);
+});
+
+#[derive(Clone)]
+pub struct px_40;
+node_style!(px_40, |_, style| {
+    style.padding.left = Val::Px(160.0);
+    style.padding.right = Val::Px(160.0);
+});
+
+#[derive(Clone)]
+pub struct px_44;
+node_style!(px_44, |_, style| {
+    style.padding.left = Val::Px(176.0);
+    style.padding.right = Val::Px(176.0);
+});
+
+#[derive(Clone)]
+pub struct px_48;
+node_style!(px_48, |_, style| {
+    style.padding.left = Val::Px(192.0);
+    style.padding.right = Val::Px(192.0);
+});
+
+#[derive(Clone)]
+pub struct px_52;
+node_style!(px_52, |_, style| {
+    style.padding.left = Val::Px(208.0);
+    style.padding.right = Val::Px(208.0);
+});
+
+#[derive(Clone)]
+pub struct px_56;
+node_style!(px_56, |_, style| {
+    style.padding.left = Val::Px(224.0);
+    style.padding.right = Val::Px(224.0);
+});
+
+#[derive(Clone)]
+pub struct px_60;
+node_style!(px_60, |_, style| {
+    style.padding.left = Val::Px(240.0);
+    style.padding.right = Val::Px(240.0);
+});
+
+#[derive(Clone)]
+pub struct px_64;
+node_style!(px_64, |_, style| {
+    style.padding.left = Val::Px(256.0);
+    style.padding.right = Val::Px(256.0);
+});
+
+#[derive(Clone)]
+pub struct px_72;
+node_style!(px_72, |_, style| {
+    style.padding.left = Val::Px(288.0);
+    style.padding.right = Val::Px(288.0);
+});
+
+#[derive(Clone)]
+pub struct px_80;
+node_style!(px_80, |_, style| {
+    style.padding.left = Val::Px(320.0);
+    style.padding.right = Val::Px(320.0);
+});
+
+#[derive(Clone)]
+pub struct px_96;
+node_style!(px_96, |_, style| {
+    style.padding.left = Val::Px(384.0);
+    style.padding.right = Val::Px(384.0);
 });

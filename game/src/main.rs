@@ -25,6 +25,7 @@ fn main() {
     }
 
     app.add_state::<AppState>()
+        .insert_resource(ClearColor(Color::BLACK))
         .add_state::<GameState>()
         .add_plugins((
             DefaultPlugins.set(AssetPlugin {
