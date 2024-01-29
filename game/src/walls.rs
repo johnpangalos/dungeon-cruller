@@ -1,11 +1,11 @@
-use crate::constants;
-use bevy::prelude::*;
+use crate::constants::{self, TOP_WALL};
+use bevy::{prelude::*, sprite::Anchor};
 
 pub enum WallLocation {
-    Left,
-    Right,
-    Bottom,
-    Top,
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
 }
 
 #[derive(Bundle)]
@@ -16,28 +16,19 @@ pub struct WallBundle {
 impl WallLocation {
     fn position(&self) -> Vec2 {
         match self {
-            WallLocation::Left => Vec2::new(constants::LEFT_WALL, 0.),
-            WallLocation::Right => Vec2::new(constants::RIGHT_WALL, 0.),
-            WallLocation::Bottom => Vec2::new(0., constants::BOTTOM_WALL),
-            WallLocation::Top => Vec2::new(0., constants::TOP_WALL),
+            WallLocation::TopLeft => Vec2::new(constants::LEFT_WALL, TOP_WALL),
+            WallLocation::TopRight => Vec2::new(constants::RIGHT_WALL, TOP_WALL),
+            WallLocation::BottomLeft => Vec2::new(constants::LEFT_WALL, constants::BOTTOM_WALL),
+            WallLocation::BottomRight => Vec2::new(constants::RIGHT_WALL, constants::BOTTOM_WALL),
         }
     }
-    fn size(&self) -> Vec2 {
-        let arena_height = constants::TOP_WALL - constants::BOTTOM_WALL;
-        let arena_width = constants::RIGHT_WALL - constants::LEFT_WALL;
 
-        assert!(arena_height > 0.0);
-        assert!(arena_width > 0.0);
-
+    fn anchor(&self) -> Anchor {
         match self {
-            WallLocation::Left | WallLocation::Right => Vec2::new(
-                constants::WALL_THICKNESS,
-                arena_height + constants::WALL_THICKNESS,
-            ),
-            WallLocation::Bottom | WallLocation::Top => Vec2::new(
-                arena_width + constants::WALL_THICKNESS,
-                constants::WALL_THICKNESS,
-            ),
+            WallLocation::TopLeft => Anchor::TopLeft,
+            WallLocation::TopRight => Anchor::TopRight,
+            WallLocation::BottomLeft => Anchor::BottomLeft,
+            WallLocation::BottomRight => Anchor::BottomRight,
         }
     }
 }
@@ -47,12 +38,13 @@ impl WallBundle {
         WallBundle {
             sprite_bundle: SpriteBundle {
                 transform: Transform {
-                    translation: location.position().extend(0.0),
-                    scale: location.size().extend(1.0),
+                    translation: location.position().extend(-2.),
                     ..default()
                 },
                 sprite: Sprite {
                     color: constants::WALL_COLOR,
+                    anchor: location.anchor(),
+                    custom_size: Some(Vec2::new(constants::WALL_WIDTH, constants::WALL_HEIGHT)),
                     ..default()
                 },
                 ..default()
