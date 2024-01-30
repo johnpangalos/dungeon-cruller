@@ -2,8 +2,8 @@ mod constants;
 mod doors;
 mod materials;
 mod player;
+mod rooms;
 mod scenes;
-mod walls;
 
 use bevy::{
     input::common_conditions::input_just_pressed, prelude::*, render::camera::ScalingMode,
@@ -100,10 +100,10 @@ fn setup_game(
     commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
 
     // Walls
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::TopRight));
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::TopLeft));
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::BottomRight));
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::BottomLeft));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::TopRight));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::TopLeft));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::BottomRight));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::BottomLeft));
 
     // Floor
     commands.spawn(SpriteBundle {
