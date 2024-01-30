@@ -16,6 +16,23 @@ pub struct WallBundle {
     collider: Collider,
 }
 
+#[derive(Copy, Clone)]
+pub struct Room {
+    pub id: isize,
+    pub width: f32,
+    pub height: f32,
+}
+
+impl Room {
+    pub fn new(id: isize) -> Room {
+        return Room {
+            id,
+            width: constants::FLOOR_WIDTH,
+            height: constants::FLOOR_HEIGHT,
+        };
+    }
+}
+
 impl WallLocation {
     fn position(&self) -> Vec2 {
         match self {

@@ -1,10 +1,11 @@
 mod constants;
 mod doors;
+mod dungeon;
 mod inventory;
 mod materials;
 mod player;
+mod rooms;
 mod scenes;
-mod walls;
 
 use bevy::{
     input::common_conditions::input_just_pressed, prelude::*, render::camera::ScalingMode,
@@ -109,21 +110,22 @@ fn setup_game(
 
     let mut player = commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
 
-    player.add_child(console_item);
     player.insert(Inventory::OneHanded(Some(console_item)));
 
+    let entrance = dungeon::get_dungeon()[0];
+
     // Walls
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::TopRight));
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::TopLeft));
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::BottomRight));
-    commands.spawn(walls::WallBundle::new(walls::WallLocation::BottomLeft));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::TopRight));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::TopLeft));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::BottomRight));
+    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::BottomLeft));
 
     // Floor
     commands.spawn(SpriteBundle {
         texture: floor,
         transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
         sprite: Sprite {
-            custom_size: Some(Vec2::new(constants::FLOOR_WIDTH, constants::FLOOR_HEIGHT)),
+            custom_size: Some(Vec2::new(entrance.width, entrance.height)),
             ..Default::default()
         },
         ..Default::default()
