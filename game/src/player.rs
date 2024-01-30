@@ -3,6 +3,7 @@ use std::ops::Mul;
 use crate::{
     constants::{self, GameState, PLAYER_SPEED},
     doors::Door,
+    inventory::{use_active_item, Inventory, ItemEvent},
     scenes::console_log,
 };
 use bevy::prelude::*;
@@ -45,11 +46,6 @@ impl PlayerBundle {
 
 #[derive(Component)]
 pub struct Life(pub u32);
-
-pub struct Item(pub String);
-
-#[derive(Component)]
-pub struct Inventory(pub Vec<Item>);
 
 #[derive(Component)]
 pub struct Speed(pub f32);
@@ -112,6 +108,18 @@ pub fn move_player(
     );
 
     controller.translation = axis.map(|ax| ax.mul(*speed) * time.delta_seconds());
+}
+
+pub fn use_item_player(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut inventory: Query<&mut Inventory, With<Player>>,
+    mut writer: EventWriter<ItemEvent>,
+) {
+    if let Ok(mut inventory) = inventory.get_single_mut() {
+        if keyboard_input.just_pressed(KeyCode::Space) {
+            use_active_item(&mut inventory, &mut writer);
+        }
+    }
 }
 
 pub fn read_touching_door_system(

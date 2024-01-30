@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-pub const PLAYER_SIZE: Vec2 = Vec2::new(128.0, 128.0);
+pub const PLAYER_SIZE: Vec2 = Vec2::new(64.0, 64.0);
 pub const PLAYER_SPEED: f32 = 500.0;
 
 pub const WIDTH: f32 = 1920.;

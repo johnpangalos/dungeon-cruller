@@ -1,5 +1,6 @@
 mod constants;
 mod doors;
+mod inventory;
 mod materials;
 mod player;
 mod scenes;
@@ -11,6 +12,7 @@ use bevy::{
 };
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
 use constants::{AppState, GameState};
+use inventory::{ConsoleItem, Inventory, Item};
 use materials::ShaderPlugin;
 use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
 use styles::elements::StylesPlugin;
@@ -64,7 +66,12 @@ fn main() {
         )
         .add_systems(
             FixedUpdate,
-            (player::move_player, player::read_touching_door_system)
+            (
+                inventory::use_console_item,
+                player::move_player,
+                player::read_touching_door_system,
+                player::use_item_player,
+            )
                 .chain()
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(GameState::Running)),
@@ -84,7 +91,6 @@ fn setup_camera(mut commands: Commands) {
             far: 1000.0,
             ..default()
         },
-
         ..default()
     });
 }
@@ -97,7 +103,14 @@ fn setup_game(
     let floor = asset_server.load::<Image>("textures/wooden-floor.png");
     let player = asset_server.load::<Image>("textures/cat.png");
 
-    commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
+    let console_item = commands
+        .spawn((ConsoleItem("yallo".to_string()), Item))
+        .id();
+
+    let mut player = commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
+
+    player.add_child(console_item);
+    player.insert(Inventory::OneHanded(Some(console_item)));
 
     // Walls
     commands.spawn(walls::WallBundle::new(walls::WallLocation::TopRight));
