@@ -17,8 +17,8 @@ pub enum Door {
 pub struct DoorBundle {
     door: Door,
     sensor: Sensor,
-    body: RigidBody,
     sprite_bundle: SpriteBundle,
+    body: RigidBody,
     collider: Collider,
 }
 
