@@ -1,5 +1,6 @@
 mod constants;
 mod doors;
+mod dungeon;
 mod materials;
 mod player;
 mod rooms;
@@ -97,6 +98,7 @@ fn setup_game(
     let floor = asset_server.load::<Image>("textures/wooden-floor.png");
     let player = asset_server.load::<Image>("textures/cat.png");
 
+    let entrance = dungeon::get_dungeon()[0];
     commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
 
     // Walls
@@ -110,7 +112,7 @@ fn setup_game(
         texture: floor,
         transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
         sprite: Sprite {
-            custom_size: Some(Vec2::new(constants::FLOOR_WIDTH, constants::FLOOR_HEIGHT)),
+            custom_size: Some(Vec2::new(entrance.width, entrance.height)),
             ..Default::default()
         },
         ..Default::default()
