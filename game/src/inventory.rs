@@ -1,17 +1,20 @@
 use std::collections::VecDeque;
 
 use bevy::{
+    app::{App, Plugin, Update},
     ecs::{
-        bundle::Bundle,
         component::Component,
         entity::Entity,
         event::{Event, EventReader, EventWriter},
-        system::{Commands, Query},
+        schedule::{common_conditions::in_state, Condition, IntoSystemConfigs},
+        system::Query,
     },
-    hierarchy::Children,
 };
 
-use crate::scenes::console_log;
+use crate::{
+    constants::{AppState, GameState},
+    scenes::console_log,
+};
 
 #[derive(Component)]
 pub struct Item;

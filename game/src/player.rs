@@ -116,7 +116,7 @@ pub fn use_item_player(
     mut writer: EventWriter<ItemEvent>,
 ) {
     if let Ok(mut inventory) = inventory.get_single_mut() {
-        if keyboard_input.just_pressed(KeyCode::Space) {
+        if keyboard_input.pressed(KeyCode::Space) {
             use_active_item(&mut inventory, &mut writer);
         }
     }

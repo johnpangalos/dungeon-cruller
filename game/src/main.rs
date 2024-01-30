@@ -13,7 +13,7 @@ use bevy::{
 };
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
 use constants::{AppState, GameState};
-use inventory::{ConsoleItem, Inventory, Item};
+use inventory::{ConsoleItem, Inventory, Item, ItemEvent};
 use materials::ShaderPlugin;
 use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
 use styles::elements::StylesPlugin;
@@ -36,6 +36,7 @@ fn main() {
     app.add_state::<AppState>()
         .insert_resource(ClearColor(Color::BLACK))
         .add_state::<GameState>()
+        .add_event::<ItemEvent>()
         .add_plugins((
             DefaultPlugins
                 .set(AssetPlugin {
@@ -68,10 +69,10 @@ fn main() {
         .add_systems(
             FixedUpdate,
             (
-                inventory::use_console_item,
                 player::move_player,
                 player::read_touching_door_system,
                 player::use_item_player,
+                inventory::use_console_item,
             )
                 .chain()
                 .run_if(in_state(AppState::Game))
