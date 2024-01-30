@@ -64,7 +64,7 @@ fn main() {
         )
         .add_systems(
             FixedUpdate,
-            (player::move_player, player::read_result_system)
+            (player::move_player, player::read_touching_door_system)
                 .chain()
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(GameState::Running)),

@@ -114,7 +114,7 @@ pub fn move_player(
     controller.translation = axis.map(|ax| ax.mul(*speed) * time.delta_seconds());
 }
 
-pub fn read_result_system(
+pub fn read_touching_door_system(
     context: Res<RapierContext>,
     query_player: Query<Entity, With<Player>>,
     query_door: Query<Entity, With<Door>>,
