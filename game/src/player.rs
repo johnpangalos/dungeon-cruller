@@ -2,12 +2,12 @@ use std::ops::Mul;
 
 use crate::{
     constants::{self, GameState, PLAYER_SPEED},
+    doors::Door,
     scenes::console_log,
 };
 use bevy::prelude::*;
 use bevy_rapier2d::{
-    dynamics::{RigidBody, Velocity},
-    geometry::Collider,
+    control::KinematicCharacterController, geometry::Collider, plugin::RapierContext,
 };
 
 #[derive(Bundle)]
@@ -15,9 +15,8 @@ pub struct PlayerBundle {
     sprite_bundle: SpriteBundle,
     life: Life,
     player: Player,
-    body: RigidBody,
+    character_controller: KinematicCharacterController,
     collider: Collider,
-    velocity: Velocity,
     speed: Speed,
 }
 
@@ -37,9 +36,8 @@ impl PlayerBundle {
                 },
                 ..default()
             },
-            body: RigidBody::KinematicVelocityBased,
+            character_controller: KinematicCharacterController::default(),
             collider: Collider::ball(constants::PLAYER_SIZE.x / 4.0),
-            velocity: Velocity::default(),
             speed: Speed(PLAYER_SPEED),
         }
     }
@@ -73,7 +71,7 @@ fn input_as_axis(
     right: KeyCode,
     up: KeyCode,
     down: KeyCode,
-) -> Vec2 {
+) -> Option<Vec2> {
     let mut axis = Vec2::ZERO;
 
     if keyboard_input.pressed(left) {
@@ -92,14 +90,18 @@ fn input_as_axis(
         axis.y -= 1.0;
     }
 
-    axis.normalize_or_zero()
+    if axis != Vec2::ZERO {
+        return Some(axis.normalize());
+    }
+    return None;
 }
 
 pub fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut player_query: Query<(&mut Velocity, &Speed), With<Player>>,
+    time: Res<Time>,
+    mut player_query: Query<(&mut KinematicCharacterController, &Speed), With<Player>>,
 ) {
-    let (mut velocity, Speed(speed)) = player_query.single_mut();
+    let (mut controller, Speed(speed)) = player_query.single_mut();
 
     let axis = input_as_axis(
         keyboard_input,
@@ -108,5 +110,24 @@ pub fn move_player(
         KeyCode::W,
         KeyCode::S,
     );
-    velocity.linvel = axis.mul(*speed);
+
+    controller.translation = axis.map(|ax| ax.mul(*speed) * time.delta_seconds());
+}
+
+pub fn read_result_system(
+    context: Res<RapierContext>,
+    query_player: Query<Entity, With<Player>>,
+    query_door: Query<Entity, With<Door>>,
+) {
+    console_log("Touching door", "false");
+
+    if let Ok(player) = query_player.get_single() {
+        let pairs = context.intersection_pairs_with(player);
+
+        for (_, entity, _) in pairs {
+            if query_door.contains(entity) {
+                console_log("Touching door", "true");
+            }
+        }
+    }
 }

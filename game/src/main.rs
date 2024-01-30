@@ -64,12 +64,11 @@ fn main() {
         )
         .add_systems(
             FixedUpdate,
-            (player::move_player)
+            (player::move_player, player::read_result_system)
                 .chain()
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(GameState::Running)),
-        )
-        .add_event::<doors::CollisionEvent>();
+        );
 
     app.run();
 }
@@ -78,8 +77,8 @@ fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle {
         projection: OrthographicProjection {
             scaling_mode: ScalingMode::AutoMin {
-                min_width: 1920.,
-                min_height: 1080.,
+                min_width: constants::WIDTH,
+                min_height: constants::HEIGHT,
             },
             near: -1000.0,
             far: 1000.0,
@@ -118,10 +117,10 @@ fn setup_game(
     });
 
     // Doors
-    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Left));
-    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Right));
-    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Bottom));
-    commands.spawn(doors::DoorBundle::new(doors::DoorLocation::Top));
+    commands.spawn(doors::DoorBundle::new(doors::Door::Left));
+    commands.spawn(doors::DoorBundle::new(doors::Door::Right));
+    commands.spawn(doors::DoorBundle::new(doors::Door::Bottom));
+    commands.spawn(doors::DoorBundle::new(doors::Door::Top));
 
     app_state.set(AppState::Game);
 }
