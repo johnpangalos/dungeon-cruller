@@ -95,34 +95,12 @@ fn setup_game(
     mut app_state: ResMut<NextState<AppState>>,
     asset_server: ResMut<AssetServer>,
 ) {
-    let floor = asset_server.load::<Image>("textures/wooden-floor.png");
     let player = asset_server.load::<Image>("textures/cat.png");
 
-    let entrance = dungeon::get_dungeon()[0];
+    let d = dungeon::Dungeon::new();
     commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
 
-    // Walls
-    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::TopRight));
-    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::TopLeft));
-    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::BottomRight));
-    commands.spawn(rooms::WallBundle::new(rooms::WallLocation::BottomLeft));
-
-    // Floor
-    commands.spawn(SpriteBundle {
-        texture: floor,
-        transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
-        sprite: Sprite {
-            custom_size: Some(Vec2::new(entrance.width, entrance.height)),
-            ..Default::default()
-        },
-        ..Default::default()
-    });
-
-    // Doors
-    commands.spawn(doors::DoorBundle::new(doors::Door::Left));
-    commands.spawn(doors::DoorBundle::new(doors::Door::Right));
-    commands.spawn(doors::DoorBundle::new(doors::Door::Bottom));
-    commands.spawn(doors::DoorBundle::new(doors::Door::Top));
+    d.layout[0].spawn(&mut commands, asset_server);
 
     app_state.set(AppState::Game);
 }
