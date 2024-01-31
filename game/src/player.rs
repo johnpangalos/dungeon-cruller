@@ -110,11 +110,10 @@ fn use_item_player(
     mut inventory: Query<(&mut Inventory, &Transform), With<Player>>,
     mut writer: EventWriter<ItemEvent>,
 ) {
-    if keyboard_input.pressed(KeyCode::Space) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
         if let Ok((mut inventory, transform)) = inventory.get_single_mut() {
-            let direction = transform.rotation.mul_vec3(Vec3::Y).truncate();
             let position = transform.translation.truncate();
-            use_active_item(&mut inventory, &position, &direction, &mut writer);
+            use_active_item(&mut inventory, &position, &transform.rotation, &mut writer);
         }
     }
 }
@@ -140,13 +139,13 @@ fn read_touching_door_system(
 fn use_active_item(
     inventory: &mut Inventory,
     position: &Vec2,
-    direction: &Vec2,
+    rotation: &Quat,
     writer: &mut EventWriter<ItemEvent>,
 ) {
     let event = |entity: &Entity| ItemEvent::Used {
         entity: entity.clone(),
         position: position.clone(),
-        direction: direction.clone(),
+        rotation: rotation.clone(),
     };
 
     match inventory {
@@ -165,4 +164,23 @@ fn use_active_item(
         }
         Inventory::DoubleHanded(None, _) | Inventory::OneHanded(None) => {}
     };
+}
+
+fn r(
+    context: Res<RapierContext>,
+    query_player: Query<Entity, With<Player>>,
+    query_door: Query<(&Door, Entity), With<Door>>,
+    // query_dungeon: Query<Entity, With<Player>>,
+) {
+    console_log("Touching door", "false");
+
+    if let Ok(player) = query_player.get_single() {
+        let pairs = context.intersection_pairs_with(player);
+
+        for (_, entity, _) in pairs {
+            if let Ok((door, _)) = query_door.get(entity) {
+                console_log("Touching door", "true");
+            }
+        }
+    }
 }

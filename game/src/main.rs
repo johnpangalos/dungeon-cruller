@@ -13,7 +13,7 @@ use bevy::{prelude::*, render::camera::ScalingMode, window::*};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
 use constants::{AppState, GameState};
 use inventory::Inventory;
-use items::{components::Item, ConsoleItem, ItemsPlugin};
+use items::{components::Item, CasualBulletItem, ConsoleItem, ItemsPlugin};
 use materials::ShaderPlugin;
 use player::PlayerPlugin;
 use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
@@ -91,13 +91,11 @@ fn setup_game(
 ) {
     let player = asset_server.load::<Image>("textures/cat.png");
 
-    let console_item = commands
-        .spawn((Item, ConsoleItem("yallo".to_string())))
-        .id();
+    let casual_bullet_item = commands.spawn((Item, CasualBulletItem)).id();
 
     let mut player = commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));
 
-    player.insert(Inventory::OneHanded(Some(console_item)));
+    player.insert(Inventory::OneHanded(Some(casual_bullet_item)));
 
     let d = dungeon::Dungeon::new();
     d.get_current_room()
