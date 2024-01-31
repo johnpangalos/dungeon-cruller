@@ -19,16 +19,18 @@ pub struct WallBundle {
 
 #[derive(Component)]
 pub struct Room {
-    pub id: isize,
+    pub coord_x: isize,
+    pub coord_y: isize,
     pub width: f32,
     pub height: f32,
     pub floor: String,
 }
 
 impl Room {
-    pub fn new(id: isize, floor: String) -> Room {
+    pub fn new(coord_x: isize, coord_y: isize, floor: String) -> Room {
         return Room {
-            id,
+            coord_x,
+            coord_y,
             width: constants::FLOOR_WIDTH,
             height: constants::FLOOR_HEIGHT,
             floor,

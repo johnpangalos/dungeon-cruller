@@ -113,8 +113,9 @@ fn setup_game(
     player.insert(Inventory::OneHanded(Some(console_item)));
 
     let d = dungeon::Dungeon::new();
-
-    d.layout[0].spawn(&mut commands, asset_server);
+    d.get_current_room()
+        .unwrap()
+        .spawn(&mut commands, asset_server);
 
     app_state.set(AppState::Game);
 }
