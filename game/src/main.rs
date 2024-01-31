@@ -1,20 +1,21 @@
 mod constants;
 mod doors;
 mod dungeon;
+mod input;
 mod inventory;
+mod items;
 mod materials;
 mod player;
 mod rooms;
 mod scenes;
 
-use bevy::{
-    input::common_conditions::input_just_pressed, prelude::*, render::camera::ScalingMode,
-    window::*,
-};
+use bevy::{prelude::*, render::camera::ScalingMode, window::*};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
 use constants::{AppState, GameState};
-use inventory::{ConsoleItem, Inventory, Item, ItemEvent};
+use inventory::Inventory;
+use items::{components::Item, ConsoleItem, ItemsPlugin};
 use materials::ShaderPlugin;
+use player::PlayerPlugin;
 use scenes::{DebugOverlay, MainMenu, PauseMenu, PlayerOverlay};
 use styles::elements::StylesPlugin;
 
@@ -33,51 +34,37 @@ fn main() {
         ));
     }
 
+    let default_plugin = DefaultPlugins
+        .set(AssetPlugin {
+            mode: AssetMode::Processed,
+            ..default()
+        })
+        .set(WindowPlugin {
+            primary_window: Some(Window {
+                resolution: WindowResolution::new(constants::WIDTH, constants::HEIGHT),
+                ..default()
+            }),
+            ..default()
+        });
+
     app.add_state::<AppState>()
         .insert_resource(ClearColor(Color::BLACK))
         .add_state::<GameState>()
-        .add_event::<ItemEvent>()
         .add_plugins((
-            DefaultPlugins
-                .set(AssetPlugin {
-                    mode: AssetMode::Processed,
-                    ..default()
-                })
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        resolution: WindowResolution::new(constants::WIDTH, constants::HEIGHT),
-                        ..default()
-                    }),
-                    ..default()
-                }),
+            default_plugin,
             RapierPhysicsPlugin::<NoUserData>::default(),
             StylesPlugin,
             ShaderPlugin,
         ))
-        .add_plugins((MainMenu, PauseMenu, PlayerOverlay))
+        .add_plugins((
+            MainMenu,
+            PauseMenu,
+            PlayerOverlay,
+            ItemsPlugin,
+            PlayerPlugin,
+        ))
         .add_systems(Startup, setup_camera)
-        .add_systems(OnEnter(AppState::SetupGame), setup_game)
-        .add_systems(
-            Update,
-            (
-                player::pause_game.run_if(in_state(GameState::Running)),
-                player::unpause_game.run_if(in_state(GameState::Paused)),
-            )
-                .run_if(in_state(AppState::Game))
-                .run_if(input_just_pressed(KeyCode::Escape)),
-        )
-        .add_systems(
-            FixedUpdate,
-            (
-                player::move_player,
-                player::read_touching_door_system,
-                player::use_item_player,
-                inventory::use_console_item,
-            )
-                .chain()
-                .run_if(in_state(AppState::Game))
-                .run_if(in_state(GameState::Running)),
-        );
+        .add_systems(OnEnter(AppState::SetupGame), setup_game);
 
     app.run();
 }
@@ -105,7 +92,7 @@ fn setup_game(
     let player = asset_server.load::<Image>("textures/cat.png");
 
     let console_item = commands
-        .spawn((ConsoleItem("yallo".to_string()), Item))
+        .spawn((Item, ConsoleItem("yallo".to_string())))
         .id();
 
     let mut player = commands.spawn(player::PlayerBundle::new(Vec2::ZERO, player));

@@ -38,3 +38,9 @@ pub enum GameState {
     Running,
     Paused,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
+pub enum AppSet {
+    Player,
+    Items,
+}

@@ -1,15 +1,41 @@
 use std::ops::Mul;
 
 use crate::{
-    constants::{self, GameState, PLAYER_SPEED},
+    constants::{self, AppSet, AppState, GameState, PLAYER_SPEED},
     doors::Door,
-    inventory::{use_active_item, Inventory, ItemEvent},
+    input::input_as_axis,
+    inventory::Inventory,
+    items::components::ItemEvent,
     scenes::console_log,
 };
-use bevy::prelude::*;
+use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use bevy_rapier2d::{
     control::KinematicCharacterController, geometry::Collider, plugin::RapierContext,
 };
+
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            (
+                pause_game.run_if(in_state(GameState::Running)),
+                unpause_game.run_if(in_state(GameState::Paused)),
+            )
+                .run_if(in_state(AppState::Game))
+                .run_if(input_just_pressed(KeyCode::Escape)),
+        )
+        .add_systems(Update, use_item_player.in_set(AppSet::Player))
+        .add_systems(
+            FixedUpdate,
+            (move_player, read_touching_door_system)
+                .chain()
+                .run_if(in_state(AppState::Game))
+                .run_if(in_state(GameState::Running)),
+        );
+    }
+}
 
 #[derive(Bundle)]
 pub struct PlayerBundle {
@@ -53,46 +79,15 @@ pub struct Speed(pub f32);
 #[derive(Component)]
 pub struct Player;
 
-pub fn pause_game(mut game_state: ResMut<NextState<GameState>>) {
+fn pause_game(mut game_state: ResMut<NextState<GameState>>) {
     game_state.set(GameState::Paused);
 }
 
-pub fn unpause_game(mut game_state: ResMut<NextState<GameState>>) {
+fn unpause_game(mut game_state: ResMut<NextState<GameState>>) {
     game_state.set(GameState::Running);
 }
 
-fn input_as_axis(
-    keyboard_input: Res<Input<KeyCode>>,
-    left: KeyCode,
-    right: KeyCode,
-    up: KeyCode,
-    down: KeyCode,
-) -> Option<Vec2> {
-    let mut axis = Vec2::ZERO;
-
-    if keyboard_input.pressed(left) {
-        axis.x -= 1.0;
-    }
-
-    if keyboard_input.pressed(right) {
-        axis.x += 1.0;
-    }
-
-    if keyboard_input.pressed(up) {
-        axis.y += 1.0;
-    }
-
-    if keyboard_input.pressed(down) {
-        axis.y -= 1.0;
-    }
-
-    if axis != Vec2::ZERO {
-        return Some(axis.normalize());
-    }
-    return None;
-}
-
-pub fn move_player(
+fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
     mut player_query: Query<(&mut KinematicCharacterController, &Speed), With<Player>>,
@@ -110,19 +105,21 @@ pub fn move_player(
     controller.translation = axis.map(|ax| ax.mul(*speed) * time.delta_seconds());
 }
 
-pub fn use_item_player(
+fn use_item_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut inventory: Query<&mut Inventory, With<Player>>,
+    mut inventory: Query<(&mut Inventory, &Transform), With<Player>>,
     mut writer: EventWriter<ItemEvent>,
 ) {
-    if let Ok(mut inventory) = inventory.get_single_mut() {
-        if keyboard_input.pressed(KeyCode::Space) {
-            use_active_item(&mut inventory, &mut writer);
+    if keyboard_input.pressed(KeyCode::Space) {
+        if let Ok((mut inventory, transform)) = inventory.get_single_mut() {
+            let direction = transform.rotation.mul_vec3(Vec3::Y).truncate();
+            let position = transform.translation.truncate();
+            use_active_item(&mut inventory, &position, &direction, &mut writer);
         }
     }
 }
 
-pub fn read_touching_door_system(
+fn read_touching_door_system(
     context: Res<RapierContext>,
     query_player: Query<Entity, With<Player>>,
     query_door: Query<Entity, With<Door>>,
@@ -138,4 +135,34 @@ pub fn read_touching_door_system(
             }
         }
     }
+}
+
+fn use_active_item(
+    inventory: &mut Inventory,
+    position: &Vec2,
+    direction: &Vec2,
+    writer: &mut EventWriter<ItemEvent>,
+) {
+    let event = |entity: &Entity| ItemEvent::Used {
+        entity: entity.clone(),
+        position: position.clone(),
+        direction: direction.clone(),
+    };
+
+    match inventory {
+        Inventory::DoubleHanded(Some(entity), _) => {
+            writer.send(event(entity));
+        }
+        Inventory::Revolver(entities) => {
+            if let Some(entity) = entities.front() {
+                writer.send(event(entity));
+            }
+
+            entities.rotate_left(1);
+        }
+        Inventory::OneHanded(Some(entity)) => {
+            writer.send(event(entity));
+        }
+        Inventory::DoubleHanded(None, _) | Inventory::OneHanded(None) => {}
+    };
 }
