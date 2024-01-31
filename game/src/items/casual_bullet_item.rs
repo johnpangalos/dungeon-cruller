@@ -69,7 +69,7 @@ pub fn use_item(
         ));
     }
 
-    let bullet = asset_server.load::<Image>("textures/bullet.png");
+    let bullet = asset_server.load::<Image>("textures/banana.png");
 
     for event in reader.read() {
         if let ItemEvent::Used {

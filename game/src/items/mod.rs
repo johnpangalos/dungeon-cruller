@@ -53,8 +53,6 @@ fn move_bullet(
             }
         }
 
-        println!("{:?} {:?} {:?}", t, prev, next);
-
         if let (Some(from), Some(to)) = (prev, next) {
             let time_difference = to.1 - from.1;
 
