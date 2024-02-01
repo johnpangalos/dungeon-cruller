@@ -11,6 +11,7 @@ mod scenes;
 
 use bevy::{prelude::*, render::camera::ScalingMode, window::*};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
+use bevy_tweening::*;
 use constants::{AppState, GameState};
 use inventory::Inventory;
 use items::{components::Item, CasualBulletItem, ConsoleItem, ItemsPlugin};
@@ -56,6 +57,7 @@ fn main() {
             StylesPlugin,
             ShaderPlugin,
         ))
+        .add_plugins(TweeningPlugin)
         .add_plugins((
             MainMenu,
             PauseMenu,
@@ -100,7 +102,7 @@ fn setup_game(
     let d = dungeon::Dungeon::new();
     d.get_current_room()
         .unwrap()
-        .spawn(&mut commands, asset_server);
+        .spawn(commands, asset_server, 0., 0., false);
 
     app_state.set(AppState::Game);
 }

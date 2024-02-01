@@ -23,12 +23,12 @@ pub struct DoorBundle {
 }
 
 impl Door {
-    fn position(&self) -> Vec2 {
+    fn position(&self, offset_x: f32, offset_y: f32) -> Vec2 {
         let wall_position = match self {
-            Door::Left => Vec2::new(LEFT_WALL, 0.),
-            Door::Right => Vec2::new(RIGHT_WALL, 0.),
-            Door::Bottom => Vec2::new(0., BOTTOM_WALL),
-            Door::Top => Vec2::new(0., TOP_WALL),
+            Door::Left => Vec2::new(LEFT_WALL + offset_x, 0. + offset_y),
+            Door::Right => Vec2::new(RIGHT_WALL + offset_x, 0. + offset_y),
+            Door::Bottom => Vec2::new(0. + offset_x, BOTTOM_WALL + offset_y),
+            Door::Top => Vec2::new(0. + offset_x, TOP_WALL + offset_y),
         };
         wall_position
     }
@@ -44,8 +44,9 @@ impl Door {
 }
 
 impl DoorBundle {
-    pub fn new(location: Door) -> DoorBundle {
-        let transform = Transform::from_translation(location.position().extend(2.));
+    pub fn new(location: Door, offset_x: f32, offset_y: f32) -> DoorBundle {
+        let transform =
+            Transform::from_translation(location.position(offset_x, offset_y).extend(2.));
         let anchor = location.anchor();
 
         DoorBundle {

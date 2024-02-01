@@ -21,7 +21,7 @@ pub const WALL_WIDTH: f32 = FLOOR_WIDTH / 2. + WALL_THICKNESS;
 
 pub const DOOR_WIDTH: f32 = 120.;
 
-pub const WALL_COLOR: Color = Color::rgb(0.01, 0.01, 0.01);
+pub const WALL_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const DOOR_COLOR: Color = Color::rgb(1.0, 0.0, 0.0);
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

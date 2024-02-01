@@ -3,6 +3,7 @@ use std::ops::Mul;
 use crate::{
     constants::{self, AppSet, AppState, GameState, PLAYER_SPEED},
     doors::Door,
+    dungeon::Dungeon,
     input::input_as_axis,
     inventory::Inventory,
     items::components::ItemEvent,
@@ -14,6 +15,9 @@ use bevy_rapier2d::{
 };
 
 pub struct PlayerPlugin;
+
+#[derive(Event)]
+struct ExitRoomEvent((i16, i16));
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
@@ -33,7 +37,8 @@ impl Plugin for PlayerPlugin {
                 .chain()
                 .run_if(in_state(AppState::Game))
                 .run_if(in_state(GameState::Running)),
-        );
+        )
+        .add_systems(Update, move_rooms);
     }
 }
 
@@ -118,19 +123,48 @@ fn use_item_player(
     }
 }
 
-fn read_touching_door_system(
+fn read_touching_door_system<'a>(
     context: Res<RapierContext>,
     query_player: Query<Entity, With<Player>>,
-    query_door: Query<Entity, With<Door>>,
+    query_door: Query<&Door, With<Door>>,
+    mut event_exit_room: EventWriter<ExitRoomEvent>,
 ) {
-    console_log("Touching door", "false");
-
     if let Ok(player) = query_player.get_single() {
         let pairs = context.intersection_pairs_with(player);
 
-        for (_, entity, _) in pairs {
-            if query_door.contains(entity) {
-                console_log("Touching door", "true");
+        let doors_touched = pairs.filter_map(|(_, entity, _)| query_door.get(entity).ok());
+
+        for door in doors_touched {
+            let delta: (i16, i16) = match door {
+                Door::Left => (-1, 0),
+                Door::Right => (1, 0),
+                Door::Top => (0, 1),
+                Door::Bottom => (0, -1),
+            };
+            event_exit_room.send(ExitRoomEvent(delta))
+        }
+    }
+}
+
+fn move_rooms(
+    mut commands: Commands,
+    asset_server: ResMut<AssetServer>,
+    mut event_exit_room: EventReader<ExitRoomEvent>,
+    mut query_dungeon: Query<&mut Dungeon, With<Dungeon>>,
+) {
+    for event in event_exit_room.read() {
+        if let Ok(mut dungeon) = query_dungeon.get_single_mut() {
+            let delta = event.0;
+            dungeon.current_room_x = dungeon.current_room_x + isize::from(delta.0);
+            dungeon.current_room_y = dungeon.current_room_y + isize::from(delta.1);
+            if let Some(room) = dungeon.get_current_room() {
+                room.spawn(
+                    commands,
+                    asset_server,
+                    constants::WIDTH * f32::from(delta.0),
+                    constants::HEIGHT * f32::from(delta.1),
+                    true,
+                )
             }
         }
     }
@@ -164,23 +198,4 @@ fn use_active_item(
         }
         Inventory::DoubleHanded(None, _) | Inventory::OneHanded(None) => {}
     };
-}
-
-fn r(
-    context: Res<RapierContext>,
-    query_player: Query<Entity, With<Player>>,
-    query_door: Query<(&Door, Entity), With<Door>>,
-    // query_dungeon: Query<Entity, With<Player>>,
-) {
-    console_log("Touching door", "false");
-
-    if let Ok(player) = query_player.get_single() {
-        let pairs = context.intersection_pairs_with(player);
-
-        for (_, entity, _) in pairs {
-            if let Ok((door, _)) = query_door.get(entity) {
-                console_log("Touching door", "true");
-            }
-        }
-    }
 }
