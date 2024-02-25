@@ -10,6 +10,7 @@ resolver = "2"
 bevy_rapier2d = { version = "0.24.0", features = ["simd-stable"] }
 bevy = { version = "0.12.1", features = ["dynamic_linking", "file_watcher"] }
 styles = { path = "../styles" }
+bevy_tweening = "0.9"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
